@@ -1,0 +1,7 @@
+# Forcer LF sur tous les fichiers texte
+* text=auto
+
+# Forcer LF sur des fichiers spécifiques (JS, JSON, config, etc.)
+*.js text eol=lf
+*.json text eol=lf
+*.config.js text eol=lf

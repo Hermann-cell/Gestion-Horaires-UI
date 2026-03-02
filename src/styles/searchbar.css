@@ -1,0 +1,71 @@
+/* searchbar.css */
+
+/* Conteneur principal pour centrer la barre */
+.search-container {
+  max-width: 600px; /* largeur max */
+  margin: 20px auto; /* centré horizontalement avec marge verticale */
+}
+
+/* Barre de recherche principale */
+.search-bar {
+  border-radius: 50px; /* arrondi complet */
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); /* ombre légère pour effet premium */
+  display: flex;
+  align-items: center;
+}
+
+/* Input de recherche */
+.search-bar .form-control {
+  background: transparent; /* fond transparent pour effet dark */
+  color: #fff; /* texte blanc */
+  border: none; /* enlever bordure */
+  padding: 10px 16px; /* padding interne */
+  font-size: 0.95rem;
+}
+
+/* Supprimer l’effet par défaut au focus */
+.search-bar .form-control:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Icône de recherche */
+.search-icon {
+  background: transparent; /* transparent pour le dark */
+  color: #ffc107; /* couleur or/jaune cinéma */
+  border: none;
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bouton clear */
+.clear-btn {
+  background: transparent; /* fond transparent */
+  color: #ccc; /* gris clair */
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+/* Hover bouton clear */
+.clear-btn:hover {
+  background: #333; /* léger survol */
+  color: #fff;
+}
+
+/* Responsive : réduire la barre sur mobile */
+@media (max-width: 768px) {
+  .search-container {
+    max-width: 90%;
+  }
+
+  .search-bar .form-control {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}

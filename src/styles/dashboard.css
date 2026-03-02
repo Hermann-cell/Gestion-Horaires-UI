@@ -1,0 +1,143 @@
+
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --sidebar-bg: #312e81;
+  --sidebar-hover: #4338ca;
+  --accent: #facc15;
+  --soft-blue: #38bdf8;
+  --soft-purple: #818cf8;
+  --text-light: #f8fafc;
+  --bg-main: #f1f5f9;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-main);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Layout */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-title {
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: var(--text-light);
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.sidebar-link:hover {
+  background: var(--sidebar-hover);
+}
+
+.sidebar-link.active {
+  background: white;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.logout {
+  padding: 12px;
+  background: var(--primary-dark);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logout:hover {
+  background: var(--primary);
+}
+
+/* Main */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-navbar {
+  background: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-area {
+  padding: 30px;
+}
+
+/* Stats */
+.stats-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 25px;
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Planning */
+.planning-card {
+  margin-top: 40px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  min-height: 250px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+/* Footer */
+
+.dashboard-footer {
+  background: white;
+  padding: 15px 30px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: auto;
+}
+
+.footer-content {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}

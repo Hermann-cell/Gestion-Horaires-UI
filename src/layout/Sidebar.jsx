@@ -1,0 +1,43 @@
+import { NavLink } from "react-router-dom";
+import { 
+  BsSpeedometer2, 
+  BsPeople, 
+  BsDoorOpen, 
+  BsPersonBadge, 
+  BsCalendarCheck,
+  BsBoxArrowRight
+} from "react-icons/bs";
+
+export default function Sidebar() {
+  return (
+    <div className="sidebar">
+      <h3 className="sidebar-title">GESTION DES HORAIRES</h3>
+
+      <nav>
+        <NavLink to="/" end className="sidebar-link">
+          <BsSpeedometer2 /> Tableau de bord
+        </NavLink>
+
+        <NavLink to="/users" className="sidebar-link">
+          <BsPeople /> Utilisateurs
+        </NavLink>
+
+        <NavLink to="/rooms" className="sidebar-link">
+          <BsDoorOpen /> Salles
+        </NavLink>
+
+        <NavLink to="/professors" className="sidebar-link">
+          <BsPersonBadge /> Professeurs
+        </NavLink>
+
+        <NavLink to="/planning" className="sidebar-link">
+          <BsCalendarCheck /> Planning
+        </NavLink>
+      </nav>
+
+      <div className="logout">
+        <BsBoxArrowRight /> Déconnexion
+      </div>
+    </div>
+  );
+}
