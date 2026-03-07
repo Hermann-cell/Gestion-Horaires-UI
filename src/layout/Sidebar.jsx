@@ -1,14 +1,22 @@
-import { NavLink } from "react-router-dom";
-import { 
-  BsSpeedometer2, 
-  BsPeople, 
-  BsDoorOpen, 
-  BsPersonBadge, 
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  BsSpeedometer2,
+  BsPeople,
+  BsDoorOpen,
+  BsPersonBadge,
   BsCalendarCheck,
-  BsBoxArrowRight
+  BsBoxArrowRight,
 } from "react-icons/bs";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login", { replace: true });
+  }
+
   return (
     <div className="sidebar">
       <h3 className="sidebar-title">GESTION DES HORAIRES</h3>
@@ -35,9 +43,9 @@ export default function Sidebar() {
         </NavLink>
       </nav>
 
-      <div className="logout">
+      <button className="logout" onClick={handleLogout} type="button">
         <BsBoxArrowRight /> Déconnexion
-      </div>
+      </button>
     </div>
   );
 }
