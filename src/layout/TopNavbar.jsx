@@ -12,7 +12,7 @@ export default function TopNavbar() {
       case "/":
         return "Tableau de bord";
       case "/users":
-        return "Utilisateurs";
+        return "Gestion des utilisateurs";
       case "/rooms":
         return "Salles";
       case "/professors":
@@ -26,10 +26,12 @@ export default function TopNavbar() {
 
   return (
     <div className="top-navbar">
-      <h2>{getTitle()}</h2>
+      {/* Titre de la page */}
+      <h2 className="page-title">{getTitle()}</h2>
 
+      {/* Menu utilisateur */}
       <Dropdown align="end">
-        <Dropdown.Toggle variant="light">
+        <Dropdown.Toggle variant="light" className="user-dropdown">
           <BsPersonCircle size={20} className="me-2" />
           Admin
         </Dropdown.Toggle>

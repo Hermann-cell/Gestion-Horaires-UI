@@ -80,18 +80,30 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 .top-navbar {
   background: white;
-  padding: 20px;
+  padding: 14px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.user-dropdown {
+  border-radius: 10px;
+}
+
 .content-area {
-  padding: 30px;
+ flex: 1;
+ padding: 16px 28px;
 }
 
 /* Stats */
