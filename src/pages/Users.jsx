@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import "../styles/users.css";
 import { FiSearch } from "react-icons/fi";
 import UserTable from "../components/UserTable.jsx";
+import * as userApi from "../api/userApi"; // ton service API
 
 const emptyForm = {
   id: null,
@@ -11,33 +12,9 @@ const emptyForm = {
   status: "Actif",
 };
 
-const INITIAL_USERS = [
-  {
-    id: 1,
-    name: "Liliane",
-    email: "liliane@email.com",
-    role: "Administrateur",
-    status: "Actif",
-  },
-  {
-    id: 2,
-    name: "Hermann",
-    email: "hermann@email.com",
-    role: "Responsable administratif",
-    status: "Actif",
-  },
-  {
-    id: 3,
-    name: "Albert",
-    email: "albert@email.com",
-    role: "Administrateur",
-    status: "Inactif",
-  },
-];
-
 export default function Users() {
-  const [users, setUsers] = useState(INITIAL_USERS);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("Tous");
 
@@ -47,28 +24,46 @@ export default function Users() {
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
+  // ---- LOAD USERS ----
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await userApi.getUsers(); // API call
+      setUsers(
+        data.map((u) => ({
+          id: u.id,
+          name: `${u.prenom} ${u.nom}`,
+          email: u.email,
+          role: u.role.nom,
+          status: "Actif", // ou récupérer le status si dispo dans l'API
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors du chargement des utilisateurs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
   // ---- FILTERED USERS ----
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
-
     return users.filter((u) => {
       const matchQuery =
-        !q ||
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q);
-
+        !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
       const matchRole = roleFilter === "Tous" ? true : u.role === roleFilter;
-
       return matchQuery && matchRole;
     });
   }, [users, query, roleFilter]);
 
   // ---- MODAL HELPERS ----
   const closeModal = () => setOpen(false);
-
-  const onChange = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  const onChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const openCreateModal = () => {
     setFormError("");
@@ -91,71 +86,82 @@ export default function Users() {
   };
 
   // ---- ACTIONS ----
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const ok = window.confirm("Voulez-vous supprimer cet utilisateur ?");
     if (!ok) return;
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+
+    try {
+      await userApi.deleteUser(id); // API call
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la suppression de l'utilisateur");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
 
-    // Validation champs
     if (!form.name.trim() || !form.email.trim()) {
       setFormError("Veuillez remplir le nom et l’email.");
       return;
     }
 
-    // Validation email
     const emailTrim = form.email.trim();
-    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim);
-    if (!okEmail) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
       setFormError("Email invalide.");
       return;
     }
 
-    if (mode === "create") {
-      // Anti-doublon uniquement en création
-      const exists = users.some(
-        (u) => u.email.toLowerCase() === emailTrim.toLowerCase()
-      );
-      if (exists) {
-        setFormError("Cet email existe déjà.");
-        return;
+    try {
+      if (mode === "create") {
+        const payload = {
+          nom: form.name.split(" ").slice(-1)[0],
+          prenom: form.name.split(" ").slice(0, -1).join(" ") || form.name,
+          email: emailTrim,
+          mot_de_passe: "Temp123!", // temporaire ou générer un mot de passe
+          roleId: form.role === "Administrateur" ? 1 : 2,
+        };
+
+        const newUser = await userApi.createUser(payload);
+        setUsers((prev) => [
+          {
+            id: newUser.id,
+            name: `${newUser.prenom} ${newUser.nom}`,
+            email: newUser.email,
+            role: newUser.role.nom,
+            status: "Actif",
+          },
+          ...prev,
+        ]);
+      } else {
+        const updatePayload = {
+          nom: form.name.split(" ").slice(-1)[0],
+          prenom: form.name.split(" ").slice(0, -1).join(" ") || form.name,
+          email: emailTrim,
+          roleId: form.role === "Administrateur" ? 1 : 2,
+        };
+        const updated = await userApi.updateUser(form.id, updatePayload);
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === form.id
+              ? {
+                  ...u,
+                  name: `${updated.prenom} ${updated.nom}`,
+                  email: updated.email,
+                  role: updated.role.nom,
+                }
+              : u
+          )
+        );
       }
-
-      const newUser = {
-        id: Date.now(),
-        name: form.name.trim(),
-        email: emailTrim,
-        role: form.role,
-        status: form.status,
-      };
-
-      setUsers((prev) => [newUser, ...prev]);
       setOpen(false);
       setForm(emptyForm);
-      return;
+    } catch (err) {
+      console.error(err);
+      setFormError("Erreur lors de l'enregistrement de l'utilisateur");
     }
-
-    // mode === "edit"
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === form.id
-          ? {
-              ...u,
-              name: form.name.trim(),
-              email: emailTrim,
-              role: form.role,
-              status: form.status,
-            }
-          : u
-      )
-    );
-
-    setOpen(false);
-    setForm(emptyForm);
   };
 
   // Fermer modal avec ESC
@@ -168,7 +174,6 @@ export default function Users() {
   return (
     <div className="users-page">
       <div className="users-container">
-        {/* (On laisse le titre dans TopNavbar, donc ici pas de H1) */}
         <p className="users-subtitle" style={{ marginBottom: 16 }}>
           Créer, filtrer et gérer les comptes.
         </p>
@@ -200,19 +205,18 @@ export default function Users() {
           </button>
         </div>
 
-        <UserTable users={filteredUsers} onDelete={handleDelete} onEdit={openEditModal} />
+        {loading ? (
+          <p>Chargement des utilisateurs...</p>
+        ) : (
+          <UserTable users={filteredUsers} onDelete={handleDelete} onEdit={openEditModal} />
+        )}
 
         {/* MODAL */}
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
               <div className="modal-head">
-                <h3>
-                  {mode === "edit"
-                    ? "Modifier un utilisateur"
-                    : "Ajouter un utilisateur"}
-                </h3>
-
+                <h3>{mode === "edit" ? "Modifier un utilisateur" : "Ajouter un utilisateur"}</h3>
                 <button className="modal-close" onClick={closeModal} aria-label="Fermer">
                   ✕
                 </button>
@@ -242,9 +246,7 @@ export default function Users() {
                     <label>Rôle</label>
                     <select value={form.role} onChange={(e) => onChange("role", e.target.value)}>
                       <option value="Administrateur">Administrateur</option>
-                      <option value="Responsable administratif">
-                        Responsable administratif
-                      </option>
+                      <option value="Responsable administratif">Responsable administratif</option>
                     </select>
                   </div>
 
