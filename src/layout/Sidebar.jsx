@@ -7,22 +7,37 @@ import {
   BsCalendarCheck,
   BsBoxArrowRight,
 } from "react-icons/bs";
+import { logoutUser } from "../api/authApi.js";
 
 export default function Sidebar() {
+
   const navigate = useNavigate();
 
   function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+
+    const confirmLogout = window.confirm(
+      "Êtes-vous sûr de vouloir vous déconnecter ?"
+    );
+
+    if (!confirmLogout) return;
+
+    logoutUser();
+
     navigate("/login", { replace: true });
+
   }
 
   return (
+
     <div className="sidebar">
-      <h3 className="sidebar-title">GESTION DES HORAIRES</h3>
+
+      <h3 className="sidebar-title">
+        GESTION DES HORAIRES
+      </h3>
 
       <nav>
-        <NavLink to="/app" end className="sidebar-link">
+
+        <NavLink to="/" end className="sidebar-link">
           <BsSpeedometer2 /> Tableau de bord
         </NavLink>
 
@@ -41,11 +56,20 @@ export default function Sidebar() {
         <NavLink to="/app/planning" className="sidebar-link">
           <BsCalendarCheck /> Planning
         </NavLink>
+
       </nav>
 
-      <button className="logout" onClick={handleLogout} type="button">
+      <button
+        className="logout"
+        onClick={handleLogout}
+        type="button"
+      >
+
         <BsBoxArrowRight /> Déconnexion
+
       </button>
+
     </div>
+
   );
 }

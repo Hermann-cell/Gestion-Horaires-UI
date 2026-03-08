@@ -1,42 +1,109 @@
 import { Dropdown } from "react-bootstrap";
 import { BsPersonCircle } from "react-icons/bs";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { logoutUser } from "../api/authApi";
 
 export default function TopNavbar() {
+
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [userName, setUserName] = useState("");
 
   const getTitle = () => {
-  const path = location.pathname;
 
-  if (path === "/app") return "Tableau de bord";
-  if (path === "/app/users") return "Gestion des utilisateurs";
-  if (path === "/app/rooms") return "Gestion des salles";
-  if (path.startsWith("/app/rooms/")) return "Détail de la salle";
-  if (path === "/app/professors") return "Professeurs";
-  if (path === "/app/planning") return "Planning";
+    const path = location.pathname;
 
-  return "Dashboard";
-};
+    switch (path) {
+      case "/":
+        return "Tableau de bord";
+      case "/users":
+        return "Gestion des utilisateurs";
+      case "/rooms":
+        return "Salles";
+      case "/professors":
+        return "Professeurs";
+      case "/planning":
+        return "Planning";
+      default:
+        return "Dashboard";
+    }
+
+  };
+
+  useEffect(() => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+      setUserName(`${user.prenom} ${user.nom}`);
+    }
+
+  }, []);
+
+  function handleLogout() {
+
+    const confirmLogout = window.confirm(
+      "Êtes-vous sûr de vouloir vous déconnecter ?"
+    );
+
+    if (!confirmLogout) return;
+
+    logoutUser();
+
+    navigate("/login", { replace: true });
+
+  }
+
 
   return (
-    <div className="top-navbar">
-      {/* Titre de la page */}
-      <h2 className="page-title">{getTitle()}</h2>
 
-      {/* Menu utilisateur */}
+    <div className="top-navbar">
+
+      {/* Titre */}
+      <h2 className="page-title">
+        {getTitle()}
+      </h2>
+
+      {/* Dropdown utilisateur */}
       <Dropdown align="end">
-        <Dropdown.Toggle variant="light" className="user-dropdown">
+
+        <Dropdown.Toggle
+          variant="light"
+          className="user-dropdown user-name"
+        >
+
           <BsPersonCircle size={20} className="me-2" />
-          Admin
+
+          {userName || "Utilisateur"}
+
         </Dropdown.Toggle>
 
         <Dropdown.Menu>
-          <Dropdown.Item>Profil</Dropdown.Item>
-          <Dropdown.Item>Paramètres</Dropdown.Item>
+
+          <Dropdown.Item>
+            Profil
+          </Dropdown.Item>
+
+          <Dropdown.Item>
+            Paramètres
+          </Dropdown.Item>
+
           <Dropdown.Divider />
-          <Dropdown.Item>Déconnexion</Dropdown.Item>
+
+          <Dropdown.Item
+            onClick={handleLogout}
+            className="text-danger"
+          >
+            Déconnexion
+          </Dropdown.Item>
+
         </Dropdown.Menu>
+
       </Dropdown>
+
     </div>
+
   );
 }
