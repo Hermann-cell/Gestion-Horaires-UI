@@ -6,23 +6,17 @@ export default function TopNavbar() {
   const location = useLocation();
 
   const getTitle = () => {
-    const path = location.pathname;
+  const path = location.pathname;
 
-    switch (path) {
-      case "/":
-        return "Tableau de bord";
-      case "/users":
-        return "Gestion des utilisateurs";
-      case "/rooms":
-        return "Salles";
-      case "/professors":
-        return "Professeurs";
-      case "/planning":
-        return "Planning";
-      default:
-        return "Dashboard";
-    }
-  };
+  if (path === "/app") return "Tableau de bord";
+  if (path === "/app/users") return "Gestion des utilisateurs";
+  if (path === "/app/rooms") return "Gestion des salles";
+  if (path.startsWith("/app/rooms/")) return "Détail de la salle";
+  if (path === "/app/professors") return "Professeurs";
+  if (path === "/app/planning") return "Planning";
+
+  return "Dashboard";
+};
 
   return (
     <div className="top-navbar">

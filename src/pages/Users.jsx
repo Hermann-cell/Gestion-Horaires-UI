@@ -41,13 +41,11 @@ export default function Users() {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("Tous");
 
-  // Modal
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState("create"); // "create" | "edit"
+  const [mode, setMode] = useState("create");
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
-  // ---- FILTERED USERS ----
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
 
@@ -63,7 +61,6 @@ export default function Users() {
     });
   }, [users, query, roleFilter]);
 
-  // ---- MODAL HELPERS ----
   const closeModal = () => setOpen(false);
 
   const onChange = (key, value) => {
@@ -90,7 +87,6 @@ export default function Users() {
     setOpen(true);
   };
 
-  // ---- ACTIONS ----
   const handleDelete = (id) => {
     const ok = window.confirm("Voulez-vous supprimer cet utilisateur ?");
     if (!ok) return;
@@ -101,13 +97,11 @@ export default function Users() {
     e.preventDefault();
     setFormError("");
 
-    // Validation champs
     if (!form.name.trim() || !form.email.trim()) {
       setFormError("Veuillez remplir le nom et l’email.");
       return;
     }
 
-    // Validation email
     const emailTrim = form.email.trim();
     const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim);
     if (!okEmail) {
@@ -116,7 +110,6 @@ export default function Users() {
     }
 
     if (mode === "create") {
-      // Anti-doublon uniquement en création
       const exists = users.some(
         (u) => u.email.toLowerCase() === emailTrim.toLowerCase()
       );
@@ -139,7 +132,6 @@ export default function Users() {
       return;
     }
 
-    // mode === "edit"
     setUsers((prev) =>
       prev.map((u) =>
         u.id === form.id
@@ -158,7 +150,6 @@ export default function Users() {
     setForm(emptyForm);
   };
 
-  // Fermer modal avec ESC
   useEffect(() => {
     const onKey = (ev) => ev.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
@@ -168,41 +159,53 @@ export default function Users() {
   return (
     <div className="users-page">
       <div className="users-container">
-        {/* (On laisse le titre dans TopNavbar, donc ici pas de H1) */}
-        <p className="users-subtitle" style={{ marginBottom: 16 }}>
+        <p className="users-subtitle">
           Créer, filtrer et gérer les comptes.
         </p>
 
-        <div className="users-toolbar">
-          <div className="search-box">
-            <FiSearch />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Recherche (nom ou email)..."
-            />
+        <div className="users-filters-card">
+          <div className="users-filters-grid">
+            <div className="filter-group">
+              <label>Recherche utilisateur</label>
+              <div className="search-box">
+                <FiSearch />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Recherche (nom ou email)..."
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label>Rôle</label>
+              <select
+                className="role-select"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="Tous">Tous</option>
+                <option value="Administrateur">Administrateur</option>
+                <option value="Responsable administratif">
+                  Responsable administratif
+                </option>
+              </select>
+            </div>
           </div>
 
-          <select
-            className="role-select"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="Tous">Tous</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Responsable administratif">
-              Responsable administratif
-            </option>
-          </select>
-
-          <button className="add-user-btn" onClick={openCreateModal}>
-            + Ajouter un utilisateur
-          </button>
+          <div className="users-actions">
+            <button className="add-user-btn" onClick={openCreateModal}>
+              + Ajouter un utilisateur
+            </button>
+          </div>
         </div>
 
-        <UserTable users={filteredUsers} onDelete={handleDelete} onEdit={openEditModal} />
+        <UserTable
+          users={filteredUsers}
+          onDelete={handleDelete}
+          onEdit={openEditModal}
+        />
 
-        {/* MODAL */}
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
@@ -213,7 +216,12 @@ export default function Users() {
                     : "Ajouter un utilisateur"}
                 </h3>
 
-                <button className="modal-close" onClick={closeModal} aria-label="Fermer">
+                <button
+                  className="modal-close"
+                  onClick={closeModal}
+                  aria-label="Fermer"
+                  type="button"
+                >
                   ✕
                 </button>
               </div>
@@ -240,7 +248,10 @@ export default function Users() {
                 <div className="modal-grid">
                   <div className="modal-field">
                     <label>Rôle</label>
-                    <select value={form.role} onChange={(e) => onChange("role", e.target.value)}>
+                    <select
+                      value={form.role}
+                      onChange={(e) => onChange("role", e.target.value)}
+                    >
                       <option value="Administrateur">Administrateur</option>
                       <option value="Responsable administratif">
                         Responsable administratif
@@ -250,7 +261,10 @@ export default function Users() {
 
                   <div className="modal-field">
                     <label>Statut</label>
-                    <select value={form.status} onChange={(e) => onChange("status", e.target.value)}>
+                    <select
+                      value={form.status}
+                      onChange={(e) => onChange("status", e.target.value)}
+                    >
                       <option value="Actif">Actif</option>
                       <option value="Inactif">Inactif</option>
                     </select>
@@ -260,7 +274,11 @@ export default function Users() {
                 {formError && <div className="modal-error">{formError}</div>}
 
                 <div className="modal-actions">
-                  <button type="button" className="btn-secondary" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={closeModal}
+                  >
                     Annuler
                   </button>
                   <button type="submit" className="btn-primary">
