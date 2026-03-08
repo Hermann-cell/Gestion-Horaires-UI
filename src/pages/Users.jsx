@@ -18,9 +18,8 @@ export default function Users() {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("Tous");
 
-  // Modal
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState("create"); // "create" | "edit"
+  const [mode, setMode] = useState("create");
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
@@ -61,7 +60,6 @@ export default function Users() {
     });
   }, [users, query, roleFilter]);
 
-  // ---- MODAL HELPERS ----
   const closeModal = () => setOpen(false);
   const onChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -164,7 +162,6 @@ export default function Users() {
     }
   };
 
-  // Fermer modal avec ESC
   useEffect(() => {
     const onKey = (ev) => ev.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
@@ -178,31 +175,41 @@ export default function Users() {
           Créer, filtrer et gérer les comptes.
         </p>
 
-        <div className="users-toolbar">
-          <div className="search-box">
-            <FiSearch />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Recherche (nom ou email)..."
-            />
+        <div className="users-filters-card">
+          <div className="users-filters-grid">
+            <div className="filter-group">
+              <label>Recherche utilisateur</label>
+              <div className="search-box">
+                <FiSearch />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Recherche (nom ou email)..."
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label>Rôle</label>
+              <select
+                className="role-select"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="Tous">Tous</option>
+                <option value="Administrateur">Administrateur</option>
+                <option value="Responsable administratif">
+                  Responsable administratif
+                </option>
+              </select>
+            </div>
           </div>
 
-          <select
-            className="role-select"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="Tous">Tous</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Responsable administratif">
-              Responsable administratif
-            </option>
-          </select>
-
-          <button className="add-user-btn" onClick={openCreateModal}>
-            + Ajouter un utilisateur
-          </button>
+          <div className="users-actions">
+            <button className="add-user-btn" onClick={openCreateModal}>
+              + Ajouter un utilisateur
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -211,7 +218,6 @@ export default function Users() {
           <UserTable users={filteredUsers} onDelete={handleDelete} onEdit={openEditModal} />
         )}
 
-        {/* MODAL */}
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
@@ -244,7 +250,10 @@ export default function Users() {
                 <div className="modal-grid">
                   <div className="modal-field">
                     <label>Rôle</label>
-                    <select value={form.role} onChange={(e) => onChange("role", e.target.value)}>
+                    <select
+                      value={form.role}
+                      onChange={(e) => onChange("role", e.target.value)}
+                    >
                       <option value="Administrateur">Administrateur</option>
                       <option value="Responsable administratif">Responsable administratif</option>
                     </select>
@@ -252,7 +261,10 @@ export default function Users() {
 
                   <div className="modal-field">
                     <label>Statut</label>
-                    <select value={form.status} onChange={(e) => onChange("status", e.target.value)}>
+                    <select
+                      value={form.status}
+                      onChange={(e) => onChange("status", e.target.value)}
+                    >
                       <option value="Actif">Actif</option>
                       <option value="Inactif">Inactif</option>
                     </select>
@@ -262,7 +274,11 @@ export default function Users() {
                 {formError && <div className="modal-error">{formError}</div>}
 
                 <div className="modal-actions">
-                  <button type="button" className="btn-secondary" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={closeModal}
+                  >
                     Annuler
                   </button>
                   <button type="submit" className="btn-primary">

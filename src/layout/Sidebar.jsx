@@ -41,19 +41,19 @@ export default function Sidebar() {
           <BsSpeedometer2 /> Tableau de bord
         </NavLink>
 
-        <NavLink to="/users" className="sidebar-link">
+        <NavLink to="/app/users" className="sidebar-link">
           <BsPeople /> Utilisateurs
         </NavLink>
 
-        <NavLink to="/rooms" className="sidebar-link">
+        <NavLink to="/app/rooms" className="sidebar-link">
           <BsDoorOpen /> Salles
         </NavLink>
 
-        <NavLink to="/professors" className="sidebar-link">
+        <NavLink to="/app/professors" className="sidebar-link">
           <BsPersonBadge /> Professeurs
         </NavLink>
 
-        <NavLink to="/planning" className="sidebar-link">
+        <NavLink to="/app/planning" className="sidebar-link">
           <BsCalendarCheck /> Planning
         </NavLink>
 
