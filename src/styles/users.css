@@ -169,13 +169,22 @@
 .avatar {
   width: 34px;
   height: 34px;
+
+  min-width: 34px;   /* empêche l’écrasement dans flex */
+  min-height: 34px;
+
   border-radius: 50%;
   background: #1f3f8a;
   color: white;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-weight: 800;
+  font-size: 14px;
+
+  line-height: 1;   /* corrige le centrage vertical */
 }
 
 /* badges */
@@ -409,6 +418,38 @@
 
 .btn-primary:hover {
   filter: brightness(0.95);
+}
+
+/* Loader */
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 300px;
+  gap: 12px;
+
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.loader {
+  width: 38px;
+  height: 38px;
+
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #1f3f8a;
+
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {

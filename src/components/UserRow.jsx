@@ -14,10 +14,11 @@ export default function UserRow({ user, onDelete, onEdit }) {
   return (
     <tr className="user-row">
       <td className="user-name">
-        <div className="avatar">{user.name?.charAt(0)?.toUpperCase()}</div>
+        <div className="avatar">
+          {user.name?.charAt(0)?.toUpperCase() || "U"}
+        </div>
         {user.name}
       </td>
-
       <td>{user.email}</td>
 
       <td>
@@ -33,29 +34,29 @@ export default function UserRow({ user, onDelete, onEdit }) {
           <FiMoreHorizontal />
         </button>
 
-       {open && (
-  <UserMenu
-    onClose={() => setOpen(false)}
+        {open && (
+          <UserMenu
+            onClose={() => setOpen(false)}
 
-    // ✅ Modifier : on passe l’utilisateur au parent
-    onEdit={() => {
-      setOpen(false);
-      onEdit(user);
-    }}
+            // ✅ Modifier : on passe l’utilisateur au parent
+            onEdit={() => {
+              setOpen(false);
+              onEdit(user);
+            }}
 
-    // ✅ Supprimer : on passe l'id au parent
-    onDelete={() => {
-      setOpen(false);
-      onDelete(user.id);
-    }}
+            // ✅ Supprimer : on passe l'id au parent
+            onDelete={() => {
+              setOpen(false);
+              onDelete(user.id);
+            }}
 
-    // (optionnel) on le laisse mais pas utilisé pour le moment
-    onResetPwd={() => {
-      setOpen(false);
-      alert("Réinitialiser le mot de passe (plus tard)");
-    }}
-  />
-)}
+            // (optionnel) on le laisse mais pas utilisé pour le moment
+            onResetPwd={() => {
+              setOpen(false);
+              alert("Réinitialiser le mot de passe (plus tard)");
+            }}
+          />
+        )}
       </td>
     </tr>
   );
