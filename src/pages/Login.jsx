@@ -24,7 +24,7 @@ export default function Login() {
     localStorage.setItem("token", "fake-token");
     localStorage.setItem("role", "Administrateur");
 
-    navigate("/app", { replace: true });
+    navigate("/", { replace: true });
 
     // brancher l'API plus tard
     console.log("Login:", { email, password });
@@ -110,7 +110,11 @@ export default function Login() {
                 <span>Se souvenir de moi</span>
               </label>
 
-              <button type="button" className="link-btn">
+             <button
+                type="button"
+                className="link-btn"
+                onClick={() => navigate("/forgot-password")}
+          >
                 Mot de passe oublié ?
               </button>
             </div>

@@ -7,6 +7,9 @@ import Rooms from "./pages/Rooms.jsx";
 import Professors from "./pages/Professors.jsx";
 import Planning from "./pages/Planning.jsx";
 import Login from "./pages/Login.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
+
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
@@ -16,7 +19,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/login" element={<Login />} />
-
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* Private */}
         <Route
           path="/"
