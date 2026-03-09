@@ -36,7 +36,6 @@ body {
 
 .sidebar-title {
   font-weight: 700;
-  margin-bottom: 30px;
   text-align: center;
 }
 
@@ -83,12 +82,22 @@ body {
   min-height: 100vh;
 }
 
+/* Top Navbar */
 .top-navbar {
   background: white;
   padding: 14px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.user-name {
+  max-width: 140px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .page-title {
@@ -153,3 +162,5 @@ body {
   color: #64748b;
   font-weight: 500;
 }
+
+

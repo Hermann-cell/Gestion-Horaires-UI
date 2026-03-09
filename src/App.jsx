@@ -4,6 +4,7 @@ import DashboardLayout from "./layout/DashboardLayout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Users from "./pages/Users.jsx";
 import Rooms from "./pages/Rooms.jsx";
+import RoomDetail from "./pages/RoomDetail.jsx";
 import Professors from "./pages/Professors.jsx";
 import Planning from "./pages/Planning.jsx";
 import Login from "./pages/Login.jsx";
@@ -17,28 +18,33 @@ export default function App() {
   return (
     <Router>
       <Routes>
+
+        {/* Redirection par défaut */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         {/* Private */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="rooms" element={<Rooms />} />
-          <Route path="professors" element={<Professors />} />
-          <Route path="planning" element={<Planning />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/rooms" element={<Rooms />} />
+          <Route path="/rooms/:id" element={<RoomDetail />} />
+          <Route path="/professors" element={<Professors />} />
+          <Route path="/planning" element={<Planning />} />
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
     </Router>
   );

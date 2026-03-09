@@ -1,44 +1,71 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import bgImage from "../assets/login-bg.jpg";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { loginUser } from "../api/authApi";
 
 export default function Login() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+
     setError("");
-    
+
     if (!email.trim() || !password.trim()) {
       setError("Veuillez remplir tous les champs.");
       return;
     }
 
-    // TEMPORAIRE : simulation (à supprimer quand l'API sera prête)
-    localStorage.setItem("token", "fake-token");
-    localStorage.setItem("role", "Administrateur");
+    try {
 
     navigate("/", { replace: true });
 
-    // brancher l'API plus tard
-    console.log("Login:", { email, password });
+      const data = await loginUser(email, password);
+
+      // Stockage du token
+      localStorage.setItem("token", data.token);
+
+      // Stockage du user
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      // Redirection vers l'application
+      navigate("/dashboard", { replace: true });
+
+    } catch (err) {
+
+      setError(err.message || "Erreur de connexion");
+
+    } finally {
+
+      setLoading(false);
+
+    }
   }
 
   return (
     <div className="login-page">
+
       {/* LEFT */}
       <section
         className="login-left"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         <div className="login-left-glass">
+
           <div className="login-left-content">
+
             <h1>Bienvenue</h1>
             <p>Nous sommes heureux de vous revoir.</p>
 
@@ -46,24 +73,34 @@ export default function Login() {
               <span className="badge">Gestion des horaires</span>
               <span className="badge badge-outline">Collège la cité</span>
             </div>
+
           </div>
+
         </div>
       </section>
 
       {/* RIGHT */}
       <section className="login-right">
+
         <div className="login-card modern">
+
           <div className="login-header">
             <h2>Page de connexion</h2>
-            <p className="subtitle">Connectez-vous pour accéder à votre espace.</p>
+            <p className="subtitle">
+              Connectez-vous pour accéder à votre espace.
+            </p>
           </div>
 
           <form className="login-form modern" onSubmit={handleSubmit}>
+
             {/* EMAIL */}
             <div className="field">
+
               <label>Email</label>
+
               <div className="input-wrap">
-                <span className="icon" aria-hidden="true">
+
+                <span className="icon">
                   <FiMail />
                 </span>
 
@@ -73,14 +110,19 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
+
               </div>
+
             </div>
 
             {/* PASSWORD */}
             <div className="field">
+
               <label>Mot de passe</label>
+
               <div className="input-wrap">
-                <span className="icon" aria-hidden="true">
+
+                <span className="icon">
                   <FiLock />
                 </span>
 
@@ -95,16 +137,22 @@ export default function Login() {
                   type="button"
                   className="pwd-toggle icon-btn"
                   onClick={() => setShowPwd((s) => !s)}
-                  aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                  title={showPwd ? "Masquer" : "Afficher"}
+                  aria-label={
+                    showPwd
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
                 >
                   {showPwd ? <FiEyeOff /> : <FiEye />}
                 </button>
+
               </div>
+
             </div>
 
             {/* OPTIONS */}
             <div className="row-between">
+
               <label className="remember">
                 <input type="checkbox" />
                 <span>Se souvenir de moi</span>
@@ -117,24 +165,48 @@ export default function Login() {
           >
                 Mot de passe oublié ?
               </button>
+
             </div>
 
-            {error && <div className="login-error">{error}</div>}
+            {/* ERROR */}
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
 
             {/* SUBMIT */}
-            <button className="login-submit modern" type="submit">
-              Se connecter <span className="arrow">→</span>
+            <button
+              className="login-submit modern"
+              type="submit"
+              disabled={loading}
+            >
+
+              {loading ? "Connexion..." : "Se connecter →"}
+
             </button>
 
             <div className="login-footer">
-              <span className="hint">Problème de connexion ?</span>
-              <button type="button" className="link-btn">
+
+              <span className="hint">
+                Problème de connexion ?
+              </span>
+
+              <button
+                type="button"
+                className="link-btn"
+              >
                 Contacter l’administrateur
               </button>
+
             </div>
+
           </form>
+
         </div>
+
       </section>
+
     </div>
   );
 }
