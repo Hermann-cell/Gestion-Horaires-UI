@@ -37,23 +37,23 @@ export default function Sidebar() {
 
       <nav>
 
-        <NavLink to="/" end className="sidebar-link">
+        <NavLink to="/dashboard" end className="sidebar-link">
           <BsSpeedometer2 /> Tableau de bord
         </NavLink>
 
-        <NavLink to="/app/users" className="sidebar-link">
+        <NavLink to="/users" className="sidebar-link">
           <BsPeople /> Utilisateurs
         </NavLink>
 
-        <NavLink to="/app/rooms" className="sidebar-link">
+        <NavLink to="/rooms" className="sidebar-link">
           <BsDoorOpen /> Salles
         </NavLink>
 
-        <NavLink to="/app/professors" className="sidebar-link">
+        <NavLink to="/professors" className="sidebar-link">
           <BsPersonBadge /> Professeurs
         </NavLink>
 
-        <NavLink to="/app/planning" className="sidebar-link">
+        <NavLink to="/planning" className="sidebar-link">
           <BsCalendarCheck /> Planning
         </NavLink>
 

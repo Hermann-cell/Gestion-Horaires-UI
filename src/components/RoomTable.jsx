@@ -8,7 +8,6 @@ export default function RoomTable({ rooms, onDelete, onEdit, onView }) {
         <thead>
           <tr>
             <th>Code</th>
-            <th>Nom Salle</th>
             <th>Type</th>
             <th>Capacité</th>
             <th></th>

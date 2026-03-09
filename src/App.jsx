@@ -15,31 +15,32 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Par défaut, on va au login */}
+
+        {/* Redirection par défaut */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Public */}
         <Route path="/login" element={<Login />} />
 
-        {/* Private (tout ce qui est dans /app) */}
+        {/* Routes protégées */}
         <Route
-          path="/app"
           element={
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="rooms" element={<Rooms />} />
-          <Route path="rooms/:id" element={<RoomDetail />} />
-          <Route path="professors" element={<Professors />} />
-          <Route path="planning" element={<Planning />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/rooms" element={<Rooms />} />
+          <Route path="/rooms/:id" element={<RoomDetail />} />
+          <Route path="/professors" element={<Professors />} />
+          <Route path="/planning" element={<Planning />} />
         </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
     </Router>
   );

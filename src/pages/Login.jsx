@@ -41,7 +41,7 @@ export default function Login() {
       }
 
       // Redirection vers l'application
-      navigate("/app", { replace: true });
+      navigate("/dashboard", { replace: true });
 
     } catch (err) {
 
