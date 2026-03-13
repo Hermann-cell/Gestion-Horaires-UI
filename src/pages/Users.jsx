@@ -3,12 +3,9 @@ import "../styles/users.css";
 import { FiSearch } from "react-icons/fi";
 import UserTable from "../components/UserTable.jsx";
 
-import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "../api/userApi";
+import { getUsers, createUser, updateUser, deleteUser } from "../api/userApi";
+import { getRoles } from "../api/roleApi";
+import { successToast, errorToast } from "../utils/toastServices.js";
 
 const emptyForm = {
   id: null,
@@ -20,17 +17,16 @@ const emptyForm = {
 
 export default function Users() {
   const [users, setUsers] = useState([]);
-
+  const [roles, setRoles] = useState([]);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("Tous");
 
-  // Modal
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("create");
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
-  /* ---------------- LOAD USERS ---------------- */
+  /* ---------------- LOAD USERS & ROLES ---------------- */
 
   const loadUsers = async () => {
     try {
@@ -38,11 +34,23 @@ export default function Users() {
       setUsers(data);
     } catch (err) {
       console.error("Erreur chargement users", err);
+      errorToast("Erreur lors du chargement des utilisateurs");
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      const data = await getRoles();
+      setRoles(data);
+    } catch (err) {
+      console.error("Erreur chargement roles", err);
+      errorToast("Erreur lors du chargement des rôles");
     }
   };
 
   useEffect(() => {
     loadUsers();
+    loadRoles();
   }, []);
 
   /* ---------------- FILTER ---------------- */
@@ -109,8 +117,11 @@ export default function Users() {
       setUsers((prev) =>
         prev.filter((u) => u.id !== id)
       );
+
+      successToast("Utilisateur supprimé avec succès !");
     } catch (err) {
       console.error("Erreur suppression", err);
+      errorToast("Erreur lors de la suppression");
     }
   };
 
@@ -120,8 +131,8 @@ export default function Users() {
     e.preventDefault();
     setFormError("");
 
-    if (!form.prenom.trim() || !form.email.trim()) {
-      setFormError("Veuillez remplir le prénom et l’email.");
+    if (!form.prenom.trim() || !form.email.trim() || !form.roleId) {
+      setFormError("Veuillez remplir le prénom, l’email et sélectionner un rôle.");
       return;
     }
 
@@ -141,6 +152,7 @@ export default function Users() {
           prenom: form.prenom.trim(),
           nom: form.nom.trim(),
           email: emailTrim,
+          mot_de_passe: "Default123!",
           roleId: Number(form.roleId),
         };
 
@@ -148,23 +160,24 @@ export default function Users() {
 
         setUsers((prev) => [created, ...prev]);
 
+        successToast("Utilisateur créé avec succès !");
       } else {
 
         const updatedUser = {
-          id: form.id,
           prenom: form.prenom.trim(),
           nom: form.nom.trim(),
-          email: emailTrim,
           roleId: Number(form.roleId),
         };
 
-        const updated = await updateUser(updatedUser);
+        const updated = await updateUser(form.id, updatedUser);
 
         setUsers((prev) =>
           prev.map((u) =>
             u.id === updated.id ? updated : u
           )
         );
+
+        successToast("Utilisateur modifié avec succès !");
       }
 
       setOpen(false);
@@ -173,6 +186,7 @@ export default function Users() {
     } catch (err) {
       console.error("Erreur sauvegarde", err);
       setFormError("Une erreur est survenue.");
+      errorToast("Erreur lors de l'opération");
     }
   };
 
@@ -185,7 +199,6 @@ export default function Users() {
   }, []);
 
   return (
-    <>
     <div className="users-page">
       <div className="users-container">
 
@@ -210,10 +223,11 @@ export default function Users() {
             onChange={(e) => setRoleFilter(e.target.value)}
           >
             <option value="Tous">Tous</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Responsable administratif">
-              Responsable administratif
-            </option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.nom}>
+                {r.nom}
+              </option>
+            ))}
           </select>
 
           <button className="add-user-btn" onClick={openCreateModal}>
@@ -232,7 +246,6 @@ export default function Users() {
           onEdit={openEditModal}
         />
 
-        {/* MODAL */}
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
@@ -273,9 +286,25 @@ export default function Users() {
                   <label>Email</label>
                   <input
                     value={form.email}
+                    readOnly={mode === "edit"}
                     onChange={(e) => onChange("email", e.target.value)}
                     placeholder="Ex: hermann@email.com"
                   />
+                </div>
+
+                <div className="modal-field">
+                  <label>Rôle</label>
+                  <select
+                    value={form.roleId}
+                    onChange={(e) => onChange("roleId", e.target.value)}
+                  >
+                    <option value="">Sélectionnez un rôle</option>
+                    {roles.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.nom}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {formError && <div className="modal-error">{formError}</div>}
@@ -297,6 +326,5 @@ export default function Users() {
 
       </div>
     </div>
-    </>
   );
 }
