@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import DashboardLayout from "./layout/DashboardLayout.jsx";
@@ -14,11 +15,24 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
+// Import ToastContainer de react-toastify
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function App() {
   return (
     <Router>
-      <Routes>
+      {/* ToastContainer doit être monté une seule fois */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
 
+      <Routes>
         {/* Redirection par défaut */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -44,7 +58,6 @@ export default function App() {
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
-
       </Routes>
     </Router>
   );

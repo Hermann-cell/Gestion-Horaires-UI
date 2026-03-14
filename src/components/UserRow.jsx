@@ -9,7 +9,7 @@ export default function UserRow({ user, onDelete, onEdit }) {
     user.role === "Administrateur" ? "role-admin" : "role-resp";
 
   const statusClass =
-    user.status === "Actif" ? "status-active" : "status-inactive";
+    user.statut === true ? "status-active" : "status-inactive";
 
   return (
     <tr className="user-row">
@@ -19,14 +19,19 @@ export default function UserRow({ user, onDelete, onEdit }) {
         </div>
         {user.name}
       </td>
+
       <td>{user.email}</td>
 
       <td>
-        <span className={`role-badge ${roleClass}`}>{user.role}</span>
+        <span className={`role-badge ${roleClass}`}>
+          {user.role}
+        </span>
       </td>
 
       <td>
-        <span className={`status-badge ${statusClass}`}>{user.status}</span>
+        <span className={`status-badge ${statusClass}`}>
+          {user.statut ? "Actif" : "Inactif"}
+        </span>
       </td>
 
       <td className="menu-cell">
@@ -38,19 +43,16 @@ export default function UserRow({ user, onDelete, onEdit }) {
           <UserMenu
             onClose={() => setOpen(false)}
 
-            // ✅ Modifier : on passe l’utilisateur au parent
             onEdit={() => {
               setOpen(false);
               onEdit(user);
             }}
 
-            // ✅ Supprimer : on passe l'id au parent
             onDelete={() => {
               setOpen(false);
               onDelete(user.id);
             }}
 
-            // (optionnel) on le laisse mais pas utilisé pour le moment
             onResetPwd={() => {
               setOpen(false);
               alert("Réinitialiser le mot de passe (plus tard)");

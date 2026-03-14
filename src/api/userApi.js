@@ -5,7 +5,7 @@ export function getUsers() {
 }
 
 export function createUser(user) {
-  return api.post("/users", user);
+  return api.post("/users/register", user);
 }
 
 export function updateUser(id, user) {

@@ -8,10 +8,11 @@ export default function RoomRow({ room, onDelete, onEdit, onView }) {
   return (
     <tr className="room-row">
       <td className="room-code">{room.code}</td>
+      <td className="room-name">{room.name}</td>
       <td>
-        <span className="room-type-badge">{room.typeDeSalle.nom}</span>
+        <span className="room-type-badge">{room.type}</span>
       </td>
-      <td>{room.capacite}</td>
+      <td>{room.capacity}</td>
 
       <td className="menu-cell">
         <button
