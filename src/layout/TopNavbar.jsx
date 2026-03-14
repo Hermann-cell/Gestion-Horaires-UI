@@ -26,6 +26,9 @@ export default function TopNavbar() {
         return "Professeurs";
       case "/planning":
         return "Planning";
+
+      case "/profile":
+        return "Profil utilisateur";
       default:
         return "Dashboard";
     }
@@ -82,9 +85,9 @@ export default function TopNavbar() {
 
         <Dropdown.Menu>
 
-          <Dropdown.Item>
-            Profil
-          </Dropdown.Item>
+        <Dropdown.Item onClick={() => navigate("/profile")}>
+          Profil
+        </Dropdown.Item>
 
           <Dropdown.Item>
             Paramètres

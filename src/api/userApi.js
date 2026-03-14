@@ -15,3 +15,7 @@ export function updateUser(id, user) {
 export function deleteUser(id) {
   return api.delete(`/users/${id}`);
 }
+
+export function getUserById(id) {
+  return api.get(`/users/${id}`);
+}
