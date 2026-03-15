@@ -9,6 +9,10 @@ import RoomDetail from "./pages/RoomDetail.jsx";
 import Professors from "./pages/Professors.jsx";
 import Planning from "./pages/Planning.jsx";
 import Login from "./pages/Login.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
+import Profile from "./pages/Profile.jsx";
+
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
@@ -35,8 +39,9 @@ export default function App() {
 
         {/* Public */}
         <Route path="/login" element={<Login />} />
-
-        {/* Routes protégées */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Private */}
         <Route
           element={
             <ProtectedRoute>
@@ -50,6 +55,7 @@ export default function App() {
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/professors" element={<Professors />} />
           <Route path="/planning" element={<Planning />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Fallback */}

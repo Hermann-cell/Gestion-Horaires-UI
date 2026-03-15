@@ -111,10 +111,10 @@ body {
 }
 
 .content-area {
- flex: 1;
- padding: 16px 28px;
+  flex: 1;
+  padding: 24px 28px;
+  background: var(--bg-main);
 }
-
 /* Stats */
 .stats-grid {
   display: flex;

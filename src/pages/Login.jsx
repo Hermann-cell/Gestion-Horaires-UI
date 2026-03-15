@@ -28,7 +28,7 @@ export default function Login() {
 
     try {
 
-      setLoading(true);
+    navigate("/", { replace: true });
 
       const data = await loginUser(email, password);
 
@@ -158,10 +158,11 @@ export default function Login() {
                 <span>Se souvenir de moi</span>
               </label>
 
-              <button
+             <button
                 type="button"
                 className="link-btn"
-              >
+                onClick={() => navigate("/forgot-password")}
+          >
                 Mot de passe oublié ?
               </button>
 
