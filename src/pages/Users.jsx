@@ -137,17 +137,13 @@ export default function Users() {
     }
 
     const emailTrim = form.email.trim();
-
-    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim);
-
-    if (!okEmail) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
       setFormError("Email invalide.");
       return;
     }
 
     try {
       if (mode === "create") {
-
         const newUser = {
           prenom: form.prenom.trim(),
           nom: form.nom.trim(),
@@ -156,33 +152,29 @@ export default function Users() {
           roleId: Number(form.roleId),
         };
 
-        const created = await createUser(newUser);
+        await createUser(newUser);
 
-        setUsers((prev) => [created, ...prev]);
+        // 🔹 Rafraîchir la liste complète depuis l'API
+        await loadUsers();
 
         successToast("Utilisateur créé avec succès !");
       } else {
-
         const updatedUser = {
           prenom: form.prenom.trim(),
           nom: form.nom.trim(),
           roleId: Number(form.roleId),
         };
 
-        const updated = await updateUser(form.id, updatedUser);
+        await updateUser(form.id, updatedUser);
 
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === updated.id ? updated : u
-          )
-        );
+        // 🔹 Rafraîchir la liste complète depuis l'API
+        await loadUsers();
 
         successToast("Utilisateur modifié avec succès !");
       }
 
       setOpen(false);
       setForm(emptyForm);
-
     } catch (err) {
       console.error("Erreur sauvegarde", err);
       setFormError("Une erreur est survenue.");
