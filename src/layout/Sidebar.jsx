@@ -6,6 +6,7 @@ import {
   BsPersonBadge,
   BsCalendarCheck,
   BsBoxArrowRight,
+  BsBook,
 } from "react-icons/bs";
 import { logoutUser } from "../api/authApi.js";
 
@@ -51,6 +52,10 @@ export default function Sidebar() {
 
         <NavLink to="/professors" className="sidebar-link">
           <BsPersonBadge /> Professeurs
+        </NavLink>
+
+        <NavLink to="/courses" className="sidebar-link">
+          <BsBook /> Cours
         </NavLink>
 
         <NavLink to="/planning" className="sidebar-link">

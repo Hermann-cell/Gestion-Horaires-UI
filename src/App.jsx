@@ -19,6 +19,8 @@ import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 // Import ToastContainer de react-toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Courses from "./pages/Courses.jsx";
+import CourseDetail from "./pages/CourseDetail.jsx";
 
 export default function App() {
   return (
@@ -56,6 +58,8 @@ export default function App() {
           <Route path="/professors" element={<Professors />} />
           <Route path="/planning" element={<Planning />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
         </Route>
 
         {/* Fallback */}
