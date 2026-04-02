@@ -12,7 +12,7 @@ export default function CourseDetail() {
   const [course, setCourse] = useState(location.state?.course || null);
   const [loading, setLoading] = useState(!location.state?.course);
 
-  // 🔥 fallback API (SANS casser UI)
+  //  fallback API (SANS casser UI)
   useEffect(() => {
     if (course) return;
 

@@ -6,6 +6,7 @@ import { FiSearch } from "react-icons/fi";
 import RoomTable from "../components/RoomTable.jsx";
 import * as salleApi from "../api/salleApi";
 import { ToastContainer, toast } from "react-toastify";
+import { Modal, Button } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 
 // Formulaire vide
@@ -13,7 +14,7 @@ const emptyForm = {
   id: null,
   code: "",
   name: "",
-  typeDeSalleId: 1, // correspond au type par défaut "Salle de cours"
+  typeDeSalleId: 1,
   capacity: "",
   description: "",
 };
@@ -35,9 +36,9 @@ export default function Rooms() {
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
-  // -------------------------------
-  // Charger les salles depuis l'API
-  // -------------------------------
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState(null);
+
   useEffect(() => {
     async function loadRooms() {
       try {
@@ -62,14 +63,13 @@ export default function Rooms() {
     loadRooms();
   }, []);
 
-  // -------------------------------
-  // Filtrage des salles
-  // -------------------------------
   const filteredRooms = useMemo(() => {
     const q = query.trim().toLowerCase();
     return rooms.filter((room) => {
       const matchQuery =
-        !q || room.code.toLowerCase().includes(q) || room.name.toLowerCase().includes(q);
+        !q ||
+        room.code.toLowerCase().includes(q) ||
+        room.name.toLowerCase().includes(q);
       const matchType = typeFilter === "Tous" ? true : room.type === typeFilter;
       return matchQuery && matchType;
     });
@@ -78,9 +78,6 @@ export default function Rooms() {
   const closeModal = () => setOpen(false);
   const onChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  // -------------------------------
-  // Modal Création / Édition
-  // -------------------------------
   const openCreateModal = () => {
     setFormError("");
     setMode("create");
@@ -103,32 +100,35 @@ export default function Rooms() {
     setOpen(true);
   };
 
-  // -------------------------------
-  // Suppression
-  // -------------------------------
-  const handleDelete = async (id) => {
-    const ok = window.confirm("Voulez-vous supprimer cette salle ?");
-    if (!ok) return;
+  const handleDelete = (id) => {
+    const selectedRoom = rooms.find((room) => room.id === id) || null;
+    setRoomToDelete(selectedRoom);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setRoomToDelete(null);
+  };
+
+  const confirmDeleteRoom = async () => {
+    if (!roomToDelete) return;
+
     try {
-      await salleApi.deleteSalle(id, {}); // body vide pour Fastify
-      setRooms((prev) => prev.filter((room) => room.id !== id));
+      await salleApi.deleteSalle(roomToDelete.id, {});
+      setRooms((prev) => prev.filter((room) => room.id !== roomToDelete.id));
       successToast("Salle supprimée avec succès !");
+      closeDeleteModal();
     } catch (err) {
       console.error(err);
       errorToast("Erreur lors de la suppression.");
     }
   };
 
-  // -------------------------------
-  // Affichage détail
-  // -------------------------------
   const handleView = (room) => {
     navigate(`/rooms/${room.id}`, { state: { room } });
   };
 
-  // -------------------------------
-  // Soumission du formulaire
-  // -------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
@@ -147,7 +147,6 @@ export default function Rooms() {
       return;
     }
 
-    // Payload adapté au backend Prisma
     const payload = {
       code: codeTrim,
       nom: nameTrim,
@@ -193,26 +192,24 @@ export default function Rooms() {
       setForm(emptyForm);
     } catch (err) {
       console.error(err);
-      setFormError(mode === "create" ? "Erreur lors de la création." : "Erreur lors de la modification.");
+      setFormError(
+        mode === "create"
+          ? "Erreur lors de la création."
+          : "Erreur lors de la modification."
+      );
       errorToast("Erreur lors de l'opération.");
     }
   };
 
-  // -------------------------------
-  // ESC key pour fermer modal
-  // -------------------------------
   useEffect(() => {
     const onKey = (ev) => ev.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // -------------------------------
-  // Rendu
-  // -------------------------------
   return (
     <div className="rooms-page">
-      <ToastContainer /> {/* <- essentiel pour afficher les toasts */}
+      <ToastContainer />
       <div className="rooms-container">
         <p className="rooms-subtitle">Créer, filtrer et gérer les salles.</p>
 
@@ -341,6 +338,34 @@ export default function Rooms() {
             </div>
           </div>
         )}
+
+        <Modal
+          show={showDeleteModal}
+          onHide={closeDeleteModal}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Supprimer une salle</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            Voulez-vous supprimer la salle{" "}
+            <strong>
+              {roomToDelete?.code} - {roomToDelete?.name}
+            </strong>{" "}
+            ?
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeDeleteModal}>
+              Annuler
+            </Button>
+
+            <Button variant="danger" onClick={confirmDeleteRoom}>
+              Supprimer
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );

@@ -5,12 +5,15 @@ import { FiSearch } from "react-icons/fi";
 import DataTable from "../components/DataTable.jsx";
 import * as coursApi from "../api/coursApi";
 import { ToastContainer, toast } from "react-toastify";
+import { Modal, Button } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 
 const emptyForm = { id: null, code: "", nom: "", duree: "", etape: "" };
 
-const successToast = (msg) => toast.success(msg, { position: "top-right", autoClose: 3000 });
-const errorToast = (msg) => toast.error(msg, { position: "top-right", autoClose: 3000 });
+const successToast = (msg) =>
+  toast.success(msg, { position: "top-right", autoClose: 3000 });
+const errorToast = (msg) =>
+  toast.error(msg, { position: "top-right", autoClose: 3000 });
 
 export default function Courses() {
   const navigate = useNavigate();
@@ -21,6 +24,9 @@ export default function Courses() {
   const [mode, setMode] = useState("create");
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   // -------------------------------
   // Charger les cours
@@ -48,7 +54,11 @@ export default function Courses() {
   };
 
   useEffect(() => {
-    loadCourses();
+    const init = async () => {
+      await loadCourses();
+    };
+
+    void init();
   }, []);
 
   // -------------------------------
@@ -79,7 +89,8 @@ export default function Courses() {
   // -------------------------------
   const closeModal = () => setOpen(false);
 
-  const onChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const onChange = (key, value) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   const openCreateModal = () => {
     setFormError("");
@@ -98,14 +109,25 @@ export default function Courses() {
   // -------------------------------
   // Delete
   // -------------------------------
-  const handleDelete = async (id) => {
-    if (!window.confirm("Voulez-vous supprimer ce cours ?")) return;
+  const handleDelete = (id) => {
+    const selectedCourse = courses.find((c) => c.id === id) || null;
+    setCourseToDelete(selectedCourse);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setCourseToDelete(null);
+  };
+
+  const confirmDeleteCourse = async () => {
+    if (!courseToDelete) return;
 
     try {
-      await coursApi.deleteCours(id);
-      // Rafraîchir la liste après suppression
-      setCourses((prev) => prev.filter((c) => c.id !== id));
+      await coursApi.deleteCours(courseToDelete.id);
+      setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id));
       successToast("Cours supprimé avec succès !");
+      closeDeleteModal();
     } catch (err) {
       console.error(err);
       errorToast("Erreur lors de la suppression");
@@ -144,28 +166,33 @@ export default function Courses() {
       return;
     }
 
-    const payload = { code: codeTrim, nom: nomTrim, duree: dureeVal, etape: etapeVal };
+    const payload = {
+      code: codeTrim,
+      nom: nomTrim,
+      duree: dureeVal,
+      etape: etapeVal,
+    };
 
     try {
-      let res;
-
       if (mode === "create") {
-        res = await coursApi.createCours(payload);
+        await coursApi.createCours(payload);
         successToast("Cours créé avec succès !");
       } else {
-        res = await coursApi.updateCours(form.id, payload);
+        await coursApi.updateCours(form.id, payload);
         successToast("Cours modifié avec succès !");
       }
 
-      // 🔹 Rafraîchir la liste complète après create/update
       await loadCourses();
 
-      // Reset modal
       setOpen(false);
       setForm(emptyForm);
     } catch (err) {
       console.error(err);
-      setFormError(mode === "create" ? "Erreur lors de la création." : "Erreur lors de la modification.");
+      setFormError(
+        mode === "create"
+          ? "Erreur lors de la création."
+          : "Erreur lors de la modification."
+      );
       errorToast("Erreur lors de l'opération");
     }
   };
@@ -188,7 +215,6 @@ export default function Courses() {
       <div className="rooms-container">
         <p className="rooms-subtitle">Créer, filtrer et gérer les cours.</p>
 
-        {/* FILTRES */}
         <div className="rooms-filters-card">
           <div className="rooms-filters-grid">
             <div className="filter-group">
@@ -211,7 +237,6 @@ export default function Courses() {
           </div>
         </div>
 
-        {/* TABLE */}
         <DataTable
           data={filteredCourses}
           columns={columns}
@@ -220,7 +245,6 @@ export default function Courses() {
           onView={handleView}
         />
 
-        {/* MODAL */}
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
@@ -233,41 +257,100 @@ export default function Courses() {
 
               <form className="modal-form" onSubmit={handleSubmit}>
                 <p className="required-note">
-                  Les champs marqués d’une <span className="required-star">*</span> sont obligatoires.
+                  Les champs marqués d’une{" "}
+                  <span className="required-star">*</span> sont obligatoires.
                 </p>
 
                 <div className="modal-field">
-                  <label><span className="required-star">*</span> Code</label>
-                  <input value={form.code} onChange={(e) => onChange("code", e.target.value)} placeholder="Ex: INF101" />
+                  <label>
+                    <span className="required-star">*</span> Code
+                  </label>
+                  <input
+                    value={form.code}
+                    onChange={(e) => onChange("code", e.target.value)}
+                    placeholder="Ex: INF101"
+                  />
                 </div>
 
                 <div className="modal-field">
-                  <label><span className="required-star">*</span> Nom</label>
-                  <input value={form.nom} onChange={(e) => onChange("nom", e.target.value)} placeholder="Ex: Algorithmique" />
+                  <label>
+                    <span className="required-star">*</span> Nom
+                  </label>
+                  <input
+                    value={form.nom}
+                    onChange={(e) => onChange("nom", e.target.value)}
+                    placeholder="Ex: Algorithmique"
+                  />
                 </div>
 
                 <div className="modal-grid">
                   <div className="modal-field">
-                    <label><span className="required-star">*</span> Durée</label>
-                    <input type="number" min="1" value={form.duree} onChange={(e) => onChange("duree", e.target.value)} />
+                    <label>
+                      <span className="required-star">*</span> Durée
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={form.duree}
+                      onChange={(e) => onChange("duree", e.target.value)}
+                    />
                   </div>
 
                   <div className="modal-field">
-                    <label><span className="required-star">*</span> Étape</label>
-                    <input type="number" min="1" value={form.etape} onChange={(e) => onChange("etape", e.target.value)} />
+                    <label>
+                      <span className="required-star">*</span> Étape
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={form.etape}
+                      onChange={(e) => onChange("etape", e.target.value)}
+                    />
                   </div>
                 </div>
 
                 {formError && <div className="modal-error">{formError}</div>}
 
                 <div className="modal-actions">
-                  <button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button>
-                  <button type="submit" className="btn-primary">{mode === "edit" ? "Enregistrer" : "Créer"}</button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={closeModal}
+                  >
+                    Annuler
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    {mode === "edit" ? "Enregistrer" : "Créer"}
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
+
+        <Modal show={showDeleteModal} onHide={closeDeleteModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Supprimer un cours</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            Voulez-vous supprimer le cours{" "}
+            <strong>
+              {courseToDelete?.code} - {courseToDelete?.nom}
+            </strong>{" "}
+            ?
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeDeleteModal}>
+              Annuler
+            </Button>
+
+            <Button variant="danger" onClick={confirmDeleteCourse}>
+              Supprimer
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );

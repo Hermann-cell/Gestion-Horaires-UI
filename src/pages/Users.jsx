@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import "../styles/users.css";
 import { FiSearch } from "react-icons/fi";
 import UserTable from "../components/UserTable.jsx";
+import { Modal, Button } from "react-bootstrap";
 
 import { getUsers, createUser, updateUser, deleteUser } from "../api/userApi";
 import { getRoles } from "../api/roleApi";
@@ -26,6 +27,9 @@ export default function Users() {
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
   /* ---------------- LOAD USERS & ROLES ---------------- */
 
   const loadUsers = async () => {
@@ -49,8 +53,15 @@ export default function Users() {
   };
 
   useEffect(() => {
-    loadUsers();
-    loadRoles();
+    const init = async () => {
+      try {
+        await Promise.all([loadUsers(), loadRoles()]);
+      } catch (err) {
+        console.error("Erreur initialisation", err);
+      }
+    };
+
+    void init();
   }, []);
 
   /* ---------------- FILTER ---------------- */
@@ -62,14 +73,10 @@ export default function Users() {
       const fullname = `${u.prenom ?? ""} ${u.nom ?? ""}`.toLowerCase();
 
       const matchQuery =
-        !q ||
-        fullname.includes(q) ||
-        u.email.toLowerCase().includes(q);
+        !q || fullname.includes(q) || u.email.toLowerCase().includes(q);
 
       const matchRole =
-        roleFilter === "Tous"
-          ? true
-          : u.role?.nom === roleFilter;
+        roleFilter === "Tous" ? true : u.role?.nom === roleFilter;
 
       return matchQuery && matchRole;
     });
@@ -107,18 +114,27 @@ export default function Users() {
 
   /* ---------------- DELETE ---------------- */
 
-  const handleDelete = async (id) => {
-    const ok = window.confirm("Voulez-vous supprimer cet utilisateur ?");
-    if (!ok) return;
+  const handleDelete = (id) => {
+    const selectedUser = users.find((u) => u.id === id) || null;
+    setUserToDelete(selectedUser);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
 
     try {
-      await deleteUser(id);
+      await deleteUser(userToDelete.id);
 
-      setUsers((prev) =>
-        prev.filter((u) => u.id !== id)
-      );
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
 
       successToast("Utilisateur supprimé avec succès !");
+      closeDeleteModal();
     } catch (err) {
       console.error("Erreur suppression", err);
       errorToast("Erreur lors de la suppression");
@@ -131,8 +147,13 @@ export default function Users() {
     e.preventDefault();
     setFormError("");
 
-    if (!form.prenom.trim() || !form.email.trim() || !form.roleId) {
-      setFormError("Veuillez remplir le prénom, l’email et sélectionner un rôle.");
+    if (
+      !form.prenom.trim() ||
+      !form.nom.trim() ||
+      !form.email.trim() ||
+      !form.roleId
+    ) {
+      setFormError("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
@@ -153,8 +174,6 @@ export default function Users() {
         };
 
         await createUser(newUser);
-
-        // 🔹 Rafraîchir la liste complète depuis l'API
         await loadUsers();
 
         successToast("Utilisateur créé avec succès !");
@@ -166,8 +185,6 @@ export default function Users() {
         };
 
         await updateUser(form.id, updatedUser);
-
-        // 🔹 Rafraîchir la liste complète depuis l'API
         await loadUsers();
 
         successToast("Utilisateur modifié avec succès !");
@@ -193,13 +210,11 @@ export default function Users() {
   return (
     <div className="users-page">
       <div className="users-container">
-
         <p className="users-subtitle" style={{ marginBottom: 16 }}>
           Créer, filtrer et gérer les comptes.
         </p>
 
         <div className="users-toolbar">
-
           <div className="search-box">
             <FiSearch />
             <input
@@ -225,7 +240,6 @@ export default function Users() {
           <button className="add-user-btn" onClick={openCreateModal}>
             + Ajouter un utilisateur
           </button>
-
         </div>
 
         <UserTable
@@ -241,7 +255,6 @@ export default function Users() {
         {open && (
           <div className="modal-overlay" onMouseDown={closeModal}>
             <div className="modal-card" onMouseDown={(e) => e.stopPropagation()}>
-
               <div className="modal-head">
                 <h3>
                   {mode === "edit"
@@ -255,37 +268,49 @@ export default function Users() {
               </div>
 
               <form className="modal-form" onSubmit={handleSubmit}>
+                <p className="required-note">
+                  Les champs marqués d’une{" "}
+                  <span className="required-star">*</span> sont obligatoires.
+                </p>
 
                 <div className="modal-field">
-                  <label>Prénom</label>
+                  <label>
+                    <span className="required-star">*</span> Prénom
+                  </label>
                   <input
                     value={form.prenom}
                     onChange={(e) => onChange("prenom", e.target.value)}
-                    placeholder="Ex: Hermann"
+                    placeholder="Ex: Liliane"
                   />
                 </div>
 
                 <div className="modal-field">
-                  <label>Nom</label>
+                  <label>
+                    <span className="required-star">*</span> Nom
+                  </label>
                   <input
                     value={form.nom}
                     onChange={(e) => onChange("nom", e.target.value)}
-                    placeholder="Ex: Njeutsa"
+                    placeholder="Ex: Kana"
                   />
                 </div>
 
                 <div className="modal-field">
-                  <label>Email</label>
+                  <label>
+                    <span className="required-star">*</span> Email
+                  </label>
                   <input
                     value={form.email}
                     readOnly={mode === "edit"}
                     onChange={(e) => onChange("email", e.target.value)}
-                    placeholder="Ex: hermann@email.com"
+                    placeholder="Ex: liliane@gmail.com"
                   />
                 </div>
 
                 <div className="modal-field">
-                  <label>Rôle</label>
+                  <label>
+                    <span className="required-star">*</span> Rôle
+                  </label>
                   <select
                     value={form.roleId}
                     onChange={(e) => onChange("roleId", e.target.value)}
@@ -302,7 +327,11 @@ export default function Users() {
                 {formError && <div className="modal-error">{formError}</div>}
 
                 <div className="modal-actions">
-                  <button type="button" className="btn-secondary" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={closeModal}
+                  >
                     Annuler
                   </button>
 
@@ -310,12 +339,38 @@ export default function Users() {
                     {mode === "edit" ? "Enregistrer" : "Créer"}
                   </button>
                 </div>
-
               </form>
             </div>
           </div>
         )}
 
+        <Modal
+          show={showDeleteModal}
+          onHide={closeDeleteModal}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Supprimer un utilisateur</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            Voulez-vous supprimer{" "}
+            <strong>
+              {userToDelete?.prenom} {userToDelete?.nom}
+            </strong>{" "}
+            ?
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeDeleteModal}>
+              Annuler
+            </Button>
+
+            <Button variant="danger" onClick={confirmDeleteUser}>
+              Supprimer
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );

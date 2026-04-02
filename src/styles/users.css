@@ -63,7 +63,7 @@
 
 /* Add button */
 .add-user-btn {
-  margin-left: auto; /* ✅ pousse le bouton à droite */
+  margin-left: auto; 
   background: #1f3f8a;
   color: white;
   border: none;
@@ -114,7 +114,7 @@
 
 .user-row {
   transition: background 0.2s ease;
-  cursor: default; /* ✅ évite que toute la ligne "semble" cliquable */
+  cursor: default; 
 }
 
 .user-row:hover {
@@ -125,19 +125,26 @@
 .user-name {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  white-space: normal;
 }
 
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;     
+  min-height: 40px;
   border-radius: 50%;
-  background: #1f3f8a;
-  color: white;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+
+  background-color: #1e3a8a;
+  color: white;
+  font-weight: 600;
+
+  flex-shrink: 0;      
 }
 
 /* badges */
@@ -364,4 +371,16 @@
 
 .btn-primary:hover {
   filter: brightness(0.95);
+}
+
+.required-note {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.required-star {
+  color: #dc2626;
+  font-weight: 800;
+  margin-right: 4px;
 }
