@@ -15,3 +15,7 @@ export function updateProfesseur(id, professeur) {
 export function deleteProfesseur(id) {
   return api.delete(`/professeurs/${id}`);
 }
+
+export function getProfesseurById(id) {
+  return api.get(`/professeurs/${id}`);
+}
