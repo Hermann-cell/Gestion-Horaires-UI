@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   BsSpeedometer2,
   BsPeople,
@@ -6,70 +7,122 @@ import {
   BsPersonBadge,
   BsCalendarCheck,
   BsBoxArrowRight,
+  BsBook,
 } from "react-icons/bs";
 import { logoutUser } from "../api/authApi.js";
+import logo from "../assets/logo.jpg";
+import "../styles/sidebar.css";
 
 export default function Sidebar() {
-
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  function handleLogout() {
+  function openLogoutModal() {
+    setShowLogoutModal(true);
+  }
 
-    const confirmLogout = window.confirm(
-      "Êtes-vous sûr de vouloir vous déconnecter ?"
-    );
+  function closeLogoutModal() {
+    setShowLogoutModal(false);
+  }
 
-    if (!confirmLogout) return;
-
+  function confirmLogout() {
     logoutUser();
-
+    setShowLogoutModal(false);
     navigate("/login", { replace: true });
-
   }
 
   return (
+    <>
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <img src={logo} alt="logo" className="sidebar-logo" />
 
-    <div className="sidebar">
+          <div className="sidebar-brand-text">
+            <span className="sidebar-title">Gestion des horaires</span>
+          </div>
+        </div>
 
-      <h3 className="sidebar-title">
-        GESTION DES HORAIRES
-      </h3>
+        <nav>
+          <NavLink to="/dashboard" end className="sidebar-link">
+            <BsSpeedometer2 /> Tableau de bord
+          </NavLink>
 
-      <nav>
+          <NavLink to="/users" className="sidebar-link">
+            <BsPeople /> Utilisateurs
+          </NavLink>
 
-        <NavLink to="/dashboard" end className="sidebar-link">
-          <BsSpeedometer2 /> Tableau de bord
-        </NavLink>
+          <NavLink to="/rooms" className="sidebar-link">
+            <BsDoorOpen /> Salles
+          </NavLink>
 
-        <NavLink to="/users" className="sidebar-link">
-          <BsPeople /> Utilisateurs
-        </NavLink>
+          <NavLink to="/professors" className="sidebar-link">
+            <BsPersonBadge /> Professeurs
+          </NavLink>
 
-        <NavLink to="/rooms" className="sidebar-link">
-          <BsDoorOpen /> Salles
-        </NavLink>
+          <NavLink to="/courses" className="sidebar-link">
+            <BsBook /> Cours
+          </NavLink>
 
-        <NavLink to="/professors" className="sidebar-link">
-          <BsPersonBadge /> Professeurs
-        </NavLink>
+          <NavLink to="/planning" className="sidebar-link">
+            <BsCalendarCheck /> Planning
+          </NavLink>
+        </nav>
 
-        <NavLink to="/planning" className="sidebar-link">
-          <BsCalendarCheck /> Planning
-        </NavLink>
+        <button className="logout" onClick={openLogoutModal} type="button">
+          <BsBoxArrowRight /> Déconnexion
+        </button>
+      </div>
 
-      </nav>
+      {showLogoutModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
 
-      <button
-        className="logout"
-        onClick={handleLogout}
-        type="button"
-      >
+          <div
+            className="modal fade show d-block"
+            tabIndex="-1"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content logout-modal">
+                <div className="modal-header border-0 pb-0">
+                  <h5 className="modal-title fw-bold">Déconnexion</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Fermer"
+                    onClick={closeLogoutModal}
+                  ></button>
+                </div>
 
-        <BsBoxArrowRight /> Déconnexion
+                <div className="modal-body pt-2">
+                  <p className="mb-0">
+                    Êtes-vous sûr de vouloir vous déconnecter ?
+                  </p>
+                </div>
 
-      </button>
+                <div className="modal-footer border-0 pt-2">
+                  <button
+                    type="button"
+                    className="btn btn-light"
+                    onClick={closeLogoutModal}
+                  >
+                    Annuler
+                  </button>
 
-    </div>
-
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={confirmLogout}
+                  >
+                    Oui, se déconnecter
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
