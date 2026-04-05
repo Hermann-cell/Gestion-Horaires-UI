@@ -1,23 +1,27 @@
+/* --- CONTENEUR GLOBAL --- */
 .calendar-container {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e3e6f0;
-    padding: 20px;
+    padding: 24px;
     margin-top: 20px;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.05);
 }
 
+/* --- GRILLE DES DISPONIBILITÉS --- */
 .calendar-grid {
     display: grid;
-    /* Augmentation de la largeur de la colonne Heure pour le texte "21h - 22h" */
-    grid-template-columns: 90px repeat(6, 1fr);
-    gap: 1px;
-    background-color: #e3e6f0; /* Couleur des bordures de la grille */
+    /* On fixe 100px pour l'heure et on force 120px min pour chaque jour */
+    grid-template-columns: 100px repeat(6, minmax(120px, 1fr));
+    gap: 0;
+    background-color: white;
     border: 1px solid #e3e6f0;
-    user-select: none;
-    max-height: 600px; /* Hauteur fixe avec scroll pour les 14 plages horaires */
-    overflow-y: auto;
     border-radius: 8px;
+    user-select: none;
+    max-height: 550px;
+    overflow-y: auto;
+    /* Scroll horizontal si l'écran est trop petit pour les 7 colonnes */
+    overflow-x: auto; 
 }
 
 .grid-header {
@@ -25,13 +29,14 @@
     top: 0;
     z-index: 10;
     background: #f8f9fc;
-    padding: 12px 5px;
+    padding: 12px;
     text-align: center;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #4e73df;
     text-transform: uppercase;
     border-bottom: 2px solid #e3e6f0;
+    border-right: 1px solid #e3e6f0;
 }
 
 .time-label {
@@ -40,68 +45,128 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #858796;
-    border-right: 1px solid #e3e6f0;
+    border-right: 2px solid #e3e6f0;
+    border-bottom: 1px solid #e3e6f0;
     position: sticky;
     left: 0;
     z-index: 5;
 }
 
 .slot {
-    height: 38px; /* Hauteur optimisée pour tenir plus de lignes à l'écran */
+    height: 42px;
     background: white;
+    border-right: 1px solid #f0f2f5;
+    border-bottom: 1px solid #f0f2f5;
     cursor: pointer;
-    transition: all 0.1s ease-in-out;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: transparent; /* Masque l'icône si non sélectionné */
 }
 
 .slot:hover {
     background: #f1f4ff;
-    z-index: 1;
-    box-shadow: inset 0 0 0 2px #4e73df;
+    box-shadow: inset 0 0 0 1px #4e73df;
 }
 
 .slot.selected {
     background: #4e73df !important;
     color: white !important;
+    border: 1px solid white;
 }
 
-.slot.google-event {
-    background: #1cc88a; /* Un vert plus doux pour la cohérence Bootstrap */
-    opacity: 0.8;
-    cursor: not-allowed;
-    color: white;
-    font-size: 0.6rem;
+/* --- BOUTONS D'ACTION (RESTAURATION) --- */
+.btn-primary {
+    background-color: #4e73df !important;
+    border-color: #4e73df !important;
+    color: #ffffff !important;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(78, 115, 223, 0.2);
 }
 
-/* Style spécifique pour le mode édition */
-.editing-badge {
-    background-color: #f6c23e;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: bold;
+.btn-primary:hover {
+    background-color: #2e59d9 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.btn-secondary {
+    background-color: #ffffff !important;
+    color: #4e73df !important;
+    border: 1px solid #d1d3e2 !important;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.icon-spin { 
-    animation: spin 1s linear infinite; 
-    display: inline-block;
+.btn-secondary:hover {
+    background-color: #f8f9fc !important;
+    border-color: #4e73df !important;
 }
 
-/* Personnalisation de la barre de défilement pour rester épuré */
+.btn-outline-primary {
+    background-color: transparent !important;
+    color: #4e73df !important;
+    border: 1px solid #4e73df !important;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4e73df !important;
+    color: #ffffff !important;
+}
+
+/* --- MODALE D'AFFECTATION --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.seance-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8f9fc;
+    border-radius: 10px;
+    border: 1px solid #eaecf4;
+    margin-bottom: 12px;
+    transition: 0.2s;
+}
+
+.seance-item-card:hover {
+    border-color: #4e73df;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* --- BARRE DE DÉFILEMENT ÉPURÉE --- */
 .calendar-grid::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 .calendar-grid::-webkit-scrollbar-thumb {
     background: #d1d3e2;
@@ -109,4 +174,96 @@
 }
 .calendar-grid::-webkit-scrollbar-track {
     background: #f8f9fc;
+}
+
+/* Badge Mode Édition */
+.editing-badge {
+    background-color: #f6c23e;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(246, 194, 62, 0.3);
+}
+
+.seance-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.seance-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.seance-item-card:hover {
+    border-color: #4e73df;
+    background: #f8faff;
+    transform: translateX(4px);
+}
+
+.seance-course-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #4e73df;
+    background: #ebf4ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.seance-course-name {
+    font-weight: 600;
+    color: #2d3748;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.seance-time {
+    font-size: 0.8rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.btn-assign-action {
+    background: transparent;
+    border: none;
+    color: #cbd5e0;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 5px;
+}
+
+.seance-item-card:hover .btn-assign-action {
+    color: #4e73df;
+}
+
+.btn-assign-action:hover {
+    color: #1cc88a !important;
+    transform: scale(1.2);
+}
+
+.empty-icon-bg {
+    width: 60px;
+    height: 60px;
+    background: #f8f9fc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
