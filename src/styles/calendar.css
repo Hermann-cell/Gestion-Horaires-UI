@@ -1,0 +1,112 @@
+.calendar-container {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e3e6f0;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.calendar-grid {
+    display: grid;
+    /* Augmentation de la largeur de la colonne Heure pour le texte "21h - 22h" */
+    grid-template-columns: 90px repeat(6, 1fr);
+    gap: 1px;
+    background-color: #e3e6f0; /* Couleur des bordures de la grille */
+    border: 1px solid #e3e6f0;
+    user-select: none;
+    max-height: 600px; /* Hauteur fixe avec scroll pour les 14 plages horaires */
+    overflow-y: auto;
+    border-radius: 8px;
+}
+
+.grid-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8f9fc;
+    padding: 12px 5px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #4e73df;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e3e6f0;
+}
+
+.time-label {
+    background: #f8f9fc;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #858796;
+    border-right: 1px solid #e3e6f0;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+.slot {
+    height: 38px; /* Hauteur optimisée pour tenir plus de lignes à l'écran */
+    background: white;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent; /* Masque l'icône si non sélectionné */
+}
+
+.slot:hover {
+    background: #f1f4ff;
+    z-index: 1;
+    box-shadow: inset 0 0 0 2px #4e73df;
+}
+
+.slot.selected {
+    background: #4e73df !important;
+    color: white !important;
+}
+
+.slot.google-event {
+    background: #1cc88a; /* Un vert plus doux pour la cohérence Bootstrap */
+    opacity: 0.8;
+    cursor: not-allowed;
+    color: white;
+    font-size: 0.6rem;
+}
+
+/* Style spécifique pour le mode édition */
+.editing-badge {
+    background-color: #f6c23e;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.icon-spin { 
+    animation: spin 1s linear infinite; 
+    display: inline-block;
+}
+
+/* Personnalisation de la barre de défilement pour rester épuré */
+.calendar-grid::-webkit-scrollbar {
+    width: 6px;
+}
+.calendar-grid::-webkit-scrollbar-thumb {
+    background: #d1d3e2;
+    border-radius: 10px;
+}
+.calendar-grid::-webkit-scrollbar-track {
+    background: #f8f9fc;
+}

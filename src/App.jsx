@@ -57,6 +57,7 @@ export default function App() {
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/professors" element={<Professors />} />
+          <Route path="/professors/:id" element={<ProfessorDetail />} />
           <Route path="/planning" element={<Planning />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/courses" element={<Courses />} />
