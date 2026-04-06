@@ -3,6 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getProfesseurById } from "../api/professeurApi";
 import "../styles/rooms.css";
 
+
+const formatHeure = (dateString) => {
+  return new Date(dateString).toLocaleTimeString("fr-CA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export default function ProfessorDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
