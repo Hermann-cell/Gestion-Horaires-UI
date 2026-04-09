@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProfesseurById } from "../api/professeurApi";
+import { getProfesseurById, updateProfesseur, assignProfesseurToSeance } from "../api/professeurApi";
+import { successToast, errorToast } from "../utils/toastServices.js";
+import TimeSlotGrid from "../components/TimeSlotGrid";
+import AssignmentModal from "../components/AssignmentModal";
+import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList } from "react-icons/fi";
 import "../styles/rooms.css";
+import "../styles/calendar.css";
 
 
 const formatHeure = (dateString) => {
@@ -14,131 +19,133 @@ const formatHeure = (dateString) => {
 export default function ProfessorDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const [professeur, setProfesseur] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
-  const loadProfesseur = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      setError("");
-
-      const data = await getProfesseurById(id);
+      const res = await getProfesseurById(id);
+      const data = res.data || res;
       setProfesseur(data);
-    } catch (err) {
-      console.error("Erreur complète :", err);
-      console.error("Response :", err?.response);
-      console.error("Status :", err?.response?.status);
-      console.error("Data :", err?.response?.data);
 
-      setError(
-        err?.response?.data?.message || "Impossible de charger le professeur."
-      );
-    } finally {
-      setLoading(false);
+      const initial = [];
+      data?.disponibilite_professeurs?.forEach(dp => {
+        const jour = dp.disponibilite?.jour;
+        dp.disponibilite?.plageHoraire_Disponibilites?.forEach(phd => {
+          if (phd.plageHoraire) {
+            const h = new Date(phd.plageHoraire.heure_debut).getHours();
+            initial.push(`${jour}-${h}h`);
+          }
+        });
+      });
+      setSelectedSlots(initial);
+    } catch (err) { errorToast("Erreur de chargement"); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadData(); }, [id]);
+
+  const handleSavePlanning = async () => {
+    try {
+      // On récupère l'auteur depuis le localStorage pour la traçabilité
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const auteurNom = storedUser.prenom ? `${storedUser.prenom} ${storedUser.nom}` : "Admin";
+
+      const payload = {
+        modifierPar: auteurNom, // Indispensable pour éviter l'erreur 500
+        disponibilites: selectedSlots.map(s => {
+          const [jour, hStr] = s.split('-');
+          const h = parseInt(hStr);
+          return { jour, heure_debut: `${h}`, heure_fin: `${h + 1}` };
+        })
+      };
+
+      await updateProfesseur(id, payload);
+      successToast("Planning sauvegardé avec succès");
+      setIsEditing(false);
+      loadData();
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Erreur de sauvegarde";
+      errorToast(errorMsg);
     }
   };
 
-  useEffect(() => {
-    loadProfesseur();
-  }, [id]);
+  const handleAssignSubmit = async (seanceId) => {
+    setIsAssigning(true);
+    try {
+      await assignProfesseurToSeance(id, seanceId);
+      successToast("Affectation réussie");
+      setIsModalOpen(false);
+      loadData();
+    } catch (err) { errorToast("Erreur lors de l'affectation"); }
+    finally { setIsAssigning(false); }
+  };
 
-  if (loading) return <p style={{ padding: 20 }}>Chargement...</p>;
-  if (error) return <p style={{ padding: 20 }}>{error}</p>;
-  if (!professeur) return <p style={{ padding: 20 }}>Professeur introuvable.</p>;
+  if (loading) return <div className="p-5 text-center">Chargement...</div>;
 
   return (
     <div className="rooms-page">
       <div className="rooms-container">
         <div className="room-detail-card">
-          <div className="room-detail-head">
-            <div>
-              <p className="room-detail-eyebrow">Détail du professeur</p>
-              <h2 className="room-detail-title">
-                {`${professeur?.prenom || ""} ${professeur?.nom || ""}`.trim() || `Professeur #${id}`}
-              </h2>
+          <div className="room-detail-head border-bottom pb-3 mb-4">
+            <div className="d-flex align-items-center gap-3">
+              <button className="btn-back-round" onClick={() => navigate(-1)}><FiArrowLeft /></button>
+              <div>
+                <h2 className="room-detail-title mb-0">{professeur.prenom} {professeur.nom}</h2>
+                <span className="badge bg-light text-primary border">{professeur.matricule}</span>
+              </div>
             </div>
-
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => navigate(-1)}
-            >
-              Retour
-            </button>
-          </div>
-
-          <div className="room-detail-grid">
-            <div className="room-detail-item">
-              <span className="detail-label">Prénom</span>
-              <span className="detail-value">{professeur?.prenom || "-"}</span>
-            </div>
-
-            <div className="room-detail-item">
-              <span className="detail-label">Nom</span>
-              <span className="detail-value">{professeur?.nom || "-"}</span>
-            </div>
-
-            <div className="room-detail-item">
-              <span className="detail-label">Matricule</span>
-              <span className="detail-value">{professeur?.matricule || "-"}</span>
-            </div>
-
-            <div className="room-detail-item">
-              <span className="detail-label">Nombre de spécialités</span>
-              <span className="detail-value">
-                {professeur?.specialite_professeurs?.length || 0}
-              </span>
+            <div className="d-flex gap-2">
+              <button className="btn-secondary" onClick={() => setIsModalOpen(true)}>
+                <FiPlusCircle /> Affecter un cours
+              </button>
+              {isEditing ? (
+                <button className="btn-primary" onClick={handleSavePlanning}><FiSave /> Sauvegarder</button>
+              ) : (
+                <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier Planning</button>
+              )}
             </div>
           </div>
 
-          <div className="room-detail-description" style={{ marginBottom: 20 }}>
-            <span className="detail-label">Spécialités</span>
-            {professeur?.specialite_professeurs?.length > 0 ? (
-              <ul style={{ marginTop: 12, paddingLeft: 20 }}>
-                {professeur.specialite_professeurs.map((sp) => (
-                  <li key={sp.id}>
-                    {sp?.specialite?.nom || "Spécialité inconnue"}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="detail-description-text">
-                Aucune spécialité renseignée pour ce professeur.
-              </p>
-            )}
-          </div>
+          <div className="row">
+            <div className="col-lg-8">
+              <div className="calendar-section">
+                <h5 className="section-title"><FiCalendar /> Disponibilités hebdomadaires</h5>
+                <TimeSlotGrid selectedSlots={selectedSlots} isEditing={isEditing} onToggle={(s) => setSelectedSlots(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])} />
+              </div>
+            </div>
 
-          <div className="room-detail-description">
-            <span className="detail-label">Disponibilités</span>
-
-            {professeur?.disponibilite_professeurs?.length > 0 ? (
-              <ul style={{ marginTop: 12, paddingLeft: 20 }}>
-                {professeur.disponibilite_professeurs.map((d) => (
-                  <li key={d.id}>
-                    {d?.disponibilite?.jour || d?.jour || "Jour inconnu"} —{" "}
-                    {d?.disponibilite?.heure_debut || d?.heure_debut || "--"} à{" "}
-                    {d?.disponibilite?.heure_fin || d?.heure_fin || "--"}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="detail-description-text">
-                Aucune disponibilité renseignée pour ce professeur.
-              </p>
-            )}
-
-            <button
-              type="button"
-              className="btn-primary"
-              style={{ marginTop: 18, width: "100%" }}
-            >
-              + Ajouter une disponibilité
-            </button>
+            <div className="col-lg-4">
+              <div className="courses-sidebar">
+                <h5 className="section-title"><FiList /> Cours assignés</h5>
+                <div className="assigned-list">
+                  {professeur.seances?.length > 0 ? professeur.seances.map(s => (
+                    <div key={s.id} className="assigned-item">
+                      <div className="assigned-dot"></div>
+                      <div className="assigned-info">
+                        <strong>{s.cours?.nom}</strong>
+                        <p>{s.disponibilite?.jour} • {new Date(s.plageHoraire?.heure_debut).getHours()}h</p>
+                      </div>
+                    </div>
+                  )) : <p className="text-muted small">Aucun cours pour le moment.</p>}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <AssignmentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAssign={handleAssignSubmit}
+        isSubmitting={isAssigning}
+      />
     </div>
   );
 }

@@ -350,6 +350,11 @@
   margin-top: 14px;
 }
 
+.modal-actions button {
+  width: fit-content;
+  flex: 0 0 auto;
+}
+
 .btn-secondary {
   border: 1px solid #e5e7eb;
   background: #fff;

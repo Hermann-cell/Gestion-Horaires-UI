@@ -1,21 +1,20 @@
 import { api } from "../utils/api";
 
-export function getProfesseurs() {
-  return api.get("/professeurs");
-}
+export const getProfesseurs = () => api.get("/professeurs");
 
-export function createProfesseur(professeur) {
-  return api.post("/professeurs", professeur);
-}
+export const createProfesseur = (professeur) => api.post("/professeurs", professeur);
 
-export function updateProfesseur(id, professeur) {
-  return api.put(`/professeurs/${id}`, professeur);
-}
+export const updateProfesseur = (id, payload) => api.put(`/professeurs/${id}`, payload);
 
-export function deleteProfesseur(id) {
-  return api.delete(`/professeurs/${id}`);
-}
+export const deleteProfesseur = (id) => api.delete(`/professeurs/${id}`);
 
-export function getProfesseurById(id) {
-  return api.get(`/professeurs/${id}`);
-}
+export const getProfesseurById = (id) => api.get(`/professeurs/${id}`);
+
+// Nouveaux endpoints pour l'affectation
+export const getAvailableSeances = () => api.get("/professeurs/seances-disponibles");
+export const assignProfesseurToSeance = (profId, seanceId) => 
+  api.post(`/professeurs/${profId}/assign`, { seanceId });
+
+
+export const getAllProfesseursWithPlanning = () =>
+  api.get("/professeurs/all/plannings");

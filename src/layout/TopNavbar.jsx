@@ -1,18 +1,19 @@
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Modal, Button } from "react-bootstrap";
 import { BsPersonCircle } from "react-icons/bs";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { logoutUser } from "../api/authApi";
 
 export default function TopNavbar() {
-
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [userName, setUserName] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const userName = user ? `${user.prenom} ${user.nom}` : "Utilisateur";
 
   const getTitle = () => {
-
     const path = location.pathname;
 
     switch (path) {
@@ -26,87 +27,85 @@ export default function TopNavbar() {
         return "Professeurs";
       case "/planning":
         return "Planning";
-
       case "/profile":
         return "Profil utilisateur";
       default:
         return "Dashboard";
     }
-
   };
 
-  useEffect(() => {
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (user) {
-      setUserName(`${user.prenom} ${user.nom}`);
-    }
-
-  }, []);
-
-  function handleLogout() {
-
-    const confirmLogout = window.confirm(
-      "Êtes-vous sûr de vouloir vous déconnecter ?"
-    );
-
-    if (!confirmLogout) return;
-
-    logoutUser();
-
-    navigate("/login", { replace: true });
-
+  function handleLogoutClick() {
+    setShowLogoutModal(true);
   }
 
+  function handleCloseLogoutModal() {
+    setShowLogoutModal(false);
+  }
+
+  function confirmLogout() {
+    logoutUser();
+    setShowLogoutModal(false);
+    navigate("/login", { replace: true });
+  }
 
   return (
+    <>
+      <div className="top-navbar">
+        <h2 className="page-title">{getTitle()}</h2>
 
-    <div className="top-navbar">
-
-      {/* Titre */}
-      <h2 className="page-title">
-        {getTitle()}
-      </h2>
-
-      {/* Dropdown utilisateur */}
-      <Dropdown align="end">
-
-        <Dropdown.Toggle
-          variant="light"
-          className="user-dropdown user-name"
-        >
-
-          <BsPersonCircle size={20} className="me-2" />
-
-          {userName || "Utilisateur"}
-
-        </Dropdown.Toggle>
-
-        <Dropdown.Menu>
-
-        <Dropdown.Item onClick={() => navigate("/profile")}>
-          Profil
-        </Dropdown.Item>
-
-          <Dropdown.Item>
-            Paramètres
-          </Dropdown.Item>
-
-          <Dropdown.Divider />
-
-          <Dropdown.Item
-            onClick={handleLogout}
-            className="text-danger"
+        <Dropdown align="end">
+          <Dropdown.Toggle
+            variant="light"
+            className="user-dropdown user-name"
           >
-            Déconnexion
-          </Dropdown.Item>
+            <BsPersonCircle size={20} className="me-2" />
+            {userName}
+          </Dropdown.Toggle>
 
-        </Dropdown.Menu>
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => navigate("/profile")}>
+              Profil
+            </Dropdown.Item>
 
-      </Dropdown>
+            <Dropdown.Item>
+              Paramètres
+            </Dropdown.Item>
 
-    </div>
+            <Dropdown.Divider />
 
+            <Dropdown.Item
+              onClick={handleLogoutClick}
+              className="text-danger"
+            >
+              Déconnexion
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+
+      <Modal
+        show={showLogoutModal}
+        onHide={handleCloseLogoutModal}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Déconnexion</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          Êtes-vous sûr de vouloir vous déconnecter ?
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseLogoutModal}>
+            Annuler
+          </Button>
+
+          <Button variant="danger" onClick={confirmLogout}>
+            Oui, se déconnecter
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }
