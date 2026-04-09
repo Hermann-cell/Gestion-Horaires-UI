@@ -22,11 +22,13 @@ export default function TopNavbar() {
       case "/users":
         return "Gestion des utilisateurs";
       case "/rooms":
-        return "Salles";
+        return "Gestion des Salles";
       case "/professors":
-        return "Professeurs";
+        return "Gestion des Professeurs";
       case "/planning":
         return "Planning";
+      case "/Cours":
+        return "Gestion des cours";
       case "/profile":
         return "Profil utilisateur";
       default:
