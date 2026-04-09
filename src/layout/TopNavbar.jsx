@@ -27,7 +27,7 @@ export default function TopNavbar() {
         return "Gestion des Professeurs";
       case "/planning":
         return "Planning";
-      case "/Cours":
+      case "/courses":
         return "Gestion des cours";
       case "/profile":
         return "Profil utilisateur";
