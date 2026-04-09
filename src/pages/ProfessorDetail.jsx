@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getProfesseurById, updateProfesseur, assignProfesseurToSeance } from "../api/professeurApi";
 import { successToast, errorToast } from "../utils/toastServices.js";
@@ -18,7 +18,7 @@ export default function ProfessorDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  const loadData = async () => {
+const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getProfesseurById(id);
@@ -40,11 +40,11 @@ export default function ProfessorDetail() {
 
       setSelectedSlots(initial);
       
-    } catch (err) { errorToast("Erreur de chargement"); }
+    } catch { errorToast("Erreur de chargement"); }
     finally { setLoading(false); }
-  };
+  }, [id]);
 
-  useEffect(() => { loadData(); }, [id]);
+  useEffect(() => { loadData(); }, [id, loadData]);
 
   const handleSavePlanning = async () => {
     try {
@@ -78,7 +78,7 @@ export default function ProfessorDetail() {
       successToast("Affectation réussie");
       setIsModalOpen(false);
       loadData();
-    } catch (err) { errorToast("Erreur lors de l'affectation"); }
+    } catch { errorToast("Erreur lors de l'affectation"); }
     finally { setIsAssigning(false); }
   };
 

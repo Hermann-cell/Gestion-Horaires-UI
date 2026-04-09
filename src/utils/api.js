@@ -24,7 +24,7 @@ async function request(url, method = "GET", body = null) {
   let data = null;
   try {
     data = await response.json();
-  } catch (err) {
+  } catch {
     // pas de JSON à parser
   }
 

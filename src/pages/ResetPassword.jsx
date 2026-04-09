@@ -5,6 +5,13 @@ import "../styles/Login.css";
 import * as api from "../api/authApi.js";
 import { successToast, errorToast } from "../utils/toastServices.js";
 
+const RuleItem = ({ valid, text }) => (
+  <li className={`password-rule ${valid ? "valid" : ""}`}>
+    <span className="rule-circle"></span>
+    <span className="rule-text">{text}</span>
+  </li>
+);
+
 function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -27,20 +34,6 @@ function ResetPassword() {
   }), [password, confirmPassword]);
 
   const isPasswordValid = Object.values(passwordRules).every(Boolean);
-
-  const passwordStrength = useMemo(() => {
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/\d/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (!password) return { score: 0, label: "", className: "" };
-    if (score <= 2) return { score, label: "Faible", className: "weak" };
-    if (score <= 4) return { score, label: "Moyen", className: "medium" };
-    return { score, label: "Fort", className: "strong" };
-  }, [password]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,13 +65,6 @@ function ResetPassword() {
     
     }
   };
-
-  const RuleItem = ({ valid, text }) => (
-    <li className={`password-rule ${valid ? "valid" : ""}`}>
-      <span className="rule-circle"></span>
-      <span className="rule-text">{text}</span>
-    </li>
-  );
 
   return (
     <div className="auth-container">
