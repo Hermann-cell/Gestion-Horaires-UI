@@ -26,16 +26,20 @@ export default function ProfessorDetail() {
       setProfesseur(data);
 
       const initial = [];
-      data?.disponibilite_professeurs?.forEach(dp => {
-        const jour = dp.disponibilite?.jour;
-        dp.disponibilite?.plageHoraire_Disponibilites?.forEach(phd => {
+
+      data?.disponibilites?.forEach(d => {
+        const jour = d.jour;
+
+        d.plageHoraire_Disponibilites?.forEach(phd => {
           if (phd.plageHoraire) {
             const h = new Date(phd.plageHoraire.heure_debut).getHours();
             initial.push(`${jour}-${h}h`);
           }
         });
       });
+
       setSelectedSlots(initial);
+      
     } catch (err) { errorToast("Erreur de chargement"); }
     finally { setLoading(false); }
   };
