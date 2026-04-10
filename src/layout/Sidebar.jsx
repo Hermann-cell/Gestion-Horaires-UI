@@ -66,7 +66,13 @@ export default function Sidebar() {
           <NavLink to="/planning" className="sidebar-link">
             <BsCalendarCheck /> Planning
           </NavLink>
+
+          <NavLink to="/planning-enseignants" className="sidebar-link">
+            <BsCalendarCheck /> Planning enseignants
+          </NavLink>
+
         </nav>
+
 
         <button className="logout" onClick={openLogoutModal} type="button">
           <BsBoxArrowRight /> Déconnexion

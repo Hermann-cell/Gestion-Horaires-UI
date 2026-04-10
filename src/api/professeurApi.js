@@ -14,3 +14,7 @@ export const getProfesseurById = (id) => api.get(`/professeurs/${id}`);
 export const getAvailableSeances = () => api.get("/professeurs/seances-disponibles");
 export const assignProfesseurToSeance = (profId, seanceId) => 
   api.post(`/professeurs/${profId}/assign`, { seanceId });
+
+
+export const getAllProfesseursWithPlanning = () =>
+  api.get("/professeurs/all/plannings");

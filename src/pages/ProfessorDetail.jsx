@@ -8,6 +8,14 @@ import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList } fr
 import "../styles/rooms.css";
 import "../styles/calendar.css";
 
+
+const formatHeure = (dateString) => {
+  return new Date(dateString).toLocaleTimeString("fr-CA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export default function ProfessorDetail() {
   const navigate = useNavigate();
   const { id } = useParams();

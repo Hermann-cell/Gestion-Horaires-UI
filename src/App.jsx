@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import Profile from "./pages/Profile.jsx";
 import ProfessorDetail from "./pages/ProfessorDetail.jsx";
 
+import TeacherPlanning from "./pages/TeacherPlanning";
 
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/professors" element={<Professors />} />
           <Route path="/professors/:id" element={<ProfessorDetail />} />
           <Route path="/planning" element={<Planning />} />
+          <Route path="/planning-enseignants" element={<TeacherPlanning />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
