@@ -26,7 +26,7 @@ export default function ProfessorDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-const loadData = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getProfesseurById(id);
@@ -47,7 +47,7 @@ const loadData = useCallback(async () => {
       });
 
       setSelectedSlots(initial);
-      
+
     } catch { errorToast("Erreur de chargement"); }
     finally { setLoading(false); }
   }, [id]);
@@ -80,14 +80,61 @@ const loadData = useCallback(async () => {
   };
 
   const handleAssignSubmit = async (seanceId) => {
+    if (!seanceId || !Number.isInteger(seanceId)) {
+      errorToast("Séance invalide");
+      return;
+    }
+
     setIsAssigning(true);
+
     try {
-      await assignProfesseurToSeance(id, seanceId);
-      successToast("Affectation réussie");
+      const response = await assignProfesseurToSeance(id, seanceId);
+
+      //  gérer axios OU fetch
+      const message =
+        response?.data?.message || // axios classique
+        response?.message ||      // fallback
+        "Affectation réussie";
+
+      successToast(message);
+
+      // UX fluide
       setIsModalOpen(false);
-      loadData();
-    } catch { errorToast("Erreur lors de l'affectation"); }
-    finally { setIsAssigning(false); }
+
+      //  refresh silencieux
+      await loadData();
+
+    } catch (error) {
+      console.error("Erreur assignation:", error);
+
+      //  extraction intelligente des erreurs backend
+      let message = "Erreur lors de l'affectation";
+
+      if (error?.response) {
+        // Axios
+        message =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          message;
+      } else if (error?.message) {
+        // JS classique
+        message = error.message;
+      }
+
+      //  gestion spécifique (option UX)
+      if (message.toLowerCase().includes("conflit")) {
+        errorToast("⚠️ " + message);
+      } else if (message.toLowerCase().includes("disponible")) {
+        errorToast("📅 " + message);
+      } else if (message.toLowerCase().includes("qualifié")) {
+        errorToast("🎓 " + message);
+      } else {
+        errorToast(message);
+      }
+
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
   if (loading) return <div className="p-5 text-center">Chargement...</div>;
