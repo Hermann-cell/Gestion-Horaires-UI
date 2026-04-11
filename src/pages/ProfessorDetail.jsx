@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProfesseurById, updateProfesseur, assignProfesseurToSeance } from "../api/professeurApi";
+import { getProfesseurById, updateProfesseur, assignProfesseurToSeance, unassignProfesseurFromSeance } from "../api/professeurApi";
 import { successToast, errorToast } from "../utils/toastServices.js";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AssignmentModal from "../components/AssignmentModal";
-import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList } from "react-icons/fi";
+import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList, FiTrash2 } from "react-icons/fi";
 import "../styles/rooms.css";
 import "../styles/calendar.css";
 
@@ -25,6 +25,7 @@ export default function ProfessorDetail() {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isUnassigning, setIsUnassigning] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -76,6 +77,27 @@ export default function ProfessorDetail() {
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Erreur de sauvegarde";
       errorToast(errorMsg);
+    }
+  };
+
+  const handleUnassignSubmit = async (seanceId) => {
+    if (!seanceId || !Number.isInteger(seanceId)) {
+      errorToast("Séance invalide");
+      return;
+    }
+
+    setIsUnassigning(true);
+    try {
+      const response = await unassignProfesseurFromSeance(seanceId);
+      const message = response?.data?.message || response?.message || "Désaffectation réussie";
+      successToast(message);
+      await loadData();
+    } catch (error) {
+      console.error("Erreur désaffectation :", error);
+      const message = error?.response?.data?.message || error?.message || "Erreur lors de la désaffectation";
+      errorToast(message);
+    } finally {
+      setIsUnassigning(false);
     }
   };
 
@@ -175,15 +197,34 @@ export default function ProfessorDetail() {
               <div className="courses-sidebar">
                 <h5 className="section-title"><FiList /> Cours assignés</h5>
                 <div className="assigned-list">
-                  {professeur.seances?.length > 0 ? professeur.seances.map(s => (
-                    <div key={s.id} className="assigned-item">
-                      <div className="assigned-dot"></div>
-                      <div className="assigned-info">
-                        <strong>{s.cours?.nom}</strong>
-                        <p>{s.disponibilite?.jour} • {new Date(s.plageHoraire?.heure_debut).getHours()}h</p>
+                  {professeur.seances?.length > 0 ? professeur.seances.map(s => {
+                    const seanceDate = new Date(s.date).toLocaleDateString("fr-CA", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "2-digit",
+                    });
+                    const timeLabel = s.plageHoraire
+                      ? `${formatHeure(s.plageHoraire.heure_debut)} - ${formatHeure(s.plageHoraire.heure_fin)}`
+                      : "Horaire inconnu";
+
+                    return (
+                      <div key={s.id} className="assigned-item">
+                        <div className="assigned-dot"></div>
+                        <div className="assigned-info">
+                          <strong>{s.cours?.nom}</strong>
+                          <p>{seanceDate} • {timeLabel}</p>
+                        </div>
+                        <button
+                          className="assigned-remove btn-danger"
+                          onClick={() => handleUnassignSubmit(s.id)}
+                          disabled={isUnassigning}
+                          title="Retirer le professeur de cette séance"
+                        >
+                          <FiTrash2 /> Retirer
+                        </button>
                       </div>
-                    </div>
-                  )) : <p className="text-muted small">Aucun cours pour le moment.</p>}
+                    );
+                  }) : <p className="text-muted small">Aucun cours pour le moment.</p>}
                 </div>
               </div>
             </div>
