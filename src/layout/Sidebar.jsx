@@ -63,6 +63,10 @@ export default function Sidebar() {
             <BsBook /> Cours
           </NavLink>
 
+          <NavLink to="/seances" className="sidebar-link">
+            <BsCalendarCheck /> Séances de cours
+          </NavLink>
+
           <NavLink to="/planning" className="sidebar-link">
             <BsCalendarCheck /> Planning
           </NavLink>
