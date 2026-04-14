@@ -327,9 +327,9 @@ export default function Profile() {
               <p>Modifiez ou réinitialisez votre mot de passe de façon sécurisée.</p>
             </div>
 
-            <Link to="/forgot-password" className="security-btn">
-              Changer le mot de passe
-            </Link>
+          <Link to="/change-password" className="security-btn">
+            Changer le mot de passe
+          </Link>
           </div>
         </section>
 

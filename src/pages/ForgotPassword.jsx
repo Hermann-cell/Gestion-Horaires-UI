@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Login.css";
+import * as api from "../api/authApi.js";
+import { successToast, errorToast } from "../utils/toastServices.js";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [testLink, setTestLink] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const validateEmail = (value) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setMessage("");
-    setTestLink("");
 
     const trimmedEmail = email.trim();
 
@@ -30,12 +31,21 @@ function ForgotPassword() {
       return;
     }
 
-    const fakeToken = "test123";
-    const link = `http://localhost:5173/reset-password?token=${fakeToken}`;
+    try {
+      setLoading(true);
 
-    setMessage("Si cet email existe, un lien de réinitialisation a été envoyé.");
-    setTestLink(link);
-    setEmail("");
+      await api.forgotPassword(trimmedEmail);
+
+      setMessage("Si cette adresse existe, un lien de réinitialisation a été envoyé dans votre boîte email.");
+      successToast("Lien de réinitialisation envoyé.");
+      setEmail("");
+    } catch (err) {
+      console.error(err);
+      setError(err?.message || "Impossible d'envoyer le lien.");
+      errorToast("Erreur lors de l'envoi du lien.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,25 +66,17 @@ function ForgotPassword() {
                 setEmail(e.target.value);
                 if (error) setError("");
                 if (message) setMessage("");
-                if (testLink) setTestLink("");
               }}
             />
           </div>
 
           {error && <div className="login-error">{error}</div>}
+          {message && <p className="info-message">{message}</p>}
 
-          <button type="submit" className="btn-primary">
-            Envoyer le lien
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Envoi..." : "Envoyer le lien"}
           </button>
         </form>
-
-        {message && <p className="info-message">{message}</p>}
-
-        {testLink && (
-          <p className="info-message">
-            Lien de test : <a href={testLink}>{testLink}</a>
-          </p>
-        )}
 
         <div className="auth-links">
           <Link to="/login">Retour à la connexion</Link>
