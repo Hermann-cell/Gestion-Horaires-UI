@@ -23,6 +23,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Courses from "./pages/Courses.jsx";
 import CourseDetail from "./pages/CourseDetail.jsx";
+import Seances from "./pages/Seances.jsx";
 
 export default function App() {
   return (
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/seances" element={<Seances />} />
         </Route>
 
         {/* Fallback */}
