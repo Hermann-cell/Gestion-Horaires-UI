@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import bgImage from "../assets/login-bg.jpg";
 import logo from "../assets/logo.jpg";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { loginUser } from "../api/authApi";
+import { useAuth } from "../auth/useAuth.js";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,13 +35,14 @@ export default function Login() {
     }
 
     try {
+      setLoading(true);
+
       const data = await loginUser(email, password);
 
-      localStorage.setItem("token", data.token);
-
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      login({
+        token: data.token,
+        user: data.user,
+      });
 
       navigate("/dashboard", { replace: true });
     } catch (err) {
@@ -68,7 +77,7 @@ export default function Login() {
       <section className="login-right">
         <div className="login-card modern">
           <div className="login-brand">
-            <img src={logo} alt="logo"  className="login-brand-logo" />
+            <img src={logo} alt="logo" className="login-brand-logo" />
             <div className="login-brand-text">
               <span className="login-brand-title">Gestion des horaires</span>
               <span className="login-brand-subtitle">Collège La Cité</span>
@@ -144,7 +153,6 @@ export default function Login() {
               {loading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
-
         </div>
       </section>
     </div>
