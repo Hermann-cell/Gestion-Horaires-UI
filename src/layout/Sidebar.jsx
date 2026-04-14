@@ -9,13 +9,14 @@ import {
   BsBoxArrowRight,
   BsBook,
 } from "react-icons/bs";
-import { logoutUser } from "../api/authApi.js";
 import logo from "../assets/logo.jpg";
 import "../styles/sidebar.css";
+import { useAuth } from "../auth/useAuth.js";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { user, isAdmin, logout } = useAuth();
 
   function openLogoutModal() {
     setShowLogoutModal(true);
@@ -26,7 +27,7 @@ export default function Sidebar() {
   }
 
   function confirmLogout() {
-    logoutUser();
+    logout();
     setShowLogoutModal(false);
     navigate("/login", { replace: true });
   }
@@ -39,6 +40,9 @@ export default function Sidebar() {
 
           <div className="sidebar-brand-text">
             <span className="sidebar-title">Gestion des horaires</span>
+            {user?.role && (
+              <small className="sidebar-role">{user.role}</small>
+            )}
           </div>
         </div>
 
@@ -47,9 +51,11 @@ export default function Sidebar() {
             <BsSpeedometer2 /> Tableau de bord
           </NavLink>
 
-          <NavLink to="/users" className="sidebar-link">
-            <BsPeople /> Utilisateurs
-          </NavLink>
+          {isAdmin && (
+            <NavLink to="/users" className="sidebar-link">
+              <BsPeople /> Utilisateurs
+            </NavLink>
+          )}
 
           <NavLink to="/rooms" className="sidebar-link">
             <BsDoorOpen /> Salles
@@ -63,6 +69,10 @@ export default function Sidebar() {
             <BsBook /> Cours
           </NavLink>
 
+          <NavLink to="/seances" className="sidebar-link">
+            <BsCalendarCheck /> Séances
+          </NavLink>
+
           <NavLink to="/planning" className="sidebar-link">
             <BsCalendarCheck /> Planning
           </NavLink>
@@ -70,9 +80,7 @@ export default function Sidebar() {
           <NavLink to="/planning-enseignants" className="sidebar-link">
             <BsCalendarCheck /> Planning enseignants
           </NavLink>
-
         </nav>
-
 
         <button className="logout" onClick={openLogoutModal} type="button">
           <BsBoxArrowRight /> Déconnexion
