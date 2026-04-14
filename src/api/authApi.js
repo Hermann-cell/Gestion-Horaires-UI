@@ -29,4 +29,13 @@ export function resetPassword(token, password) {
     token,
     password
   });
+
+}
+
+// ---------------- CHANGE PASSWORD ----------------
+export function changePassword(currentPassword, newPassword) {
+  return api.post("/users/change-password", {
+    currentPassword,
+    newPassword
+  });
 }
