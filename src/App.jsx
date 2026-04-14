@@ -55,11 +55,7 @@ export default function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={
-            <ProtectedRoute roles={["Administrateur"]}>
-              <Users />
-            </ProtectedRoute>
-          } />
+          <Route path="/users" element={<Users />} />
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/professors" element={<Professors />} />
