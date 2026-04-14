@@ -12,5 +12,5 @@ export default function ProtectedRoute({ children, roles }) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  return children; 
 }
