@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { seanceApi } from "../api/seanceApi";
+import { getSeances } from "../api/seanceApi";
 import "../styles/planning.css";
 
 const MONTHS = [
@@ -686,7 +686,7 @@ export default function Planning() {
         setLoading(true);
         setError("");
 
-        const response = await seanceApi.getAll();
+        const response = await getSeances();
         console.log("Réponse séances :", response);
 
         const rows = Array.isArray(response?.data)
