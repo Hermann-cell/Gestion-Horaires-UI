@@ -4,6 +4,10 @@ export function getCours() {
   return api.get("/cours");
 }
 
+export function getCoursById(id) {
+  return api.get(`/cours/${id}`);
+}
+
 export function createCours(cours) {
   return api.post("/cours", cours);
 }

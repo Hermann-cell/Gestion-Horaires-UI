@@ -15,6 +15,8 @@ export const getAvailableSeances = () => api.get("/professeurs/seances-disponibl
 export const assignProfesseurToSeance = (profId, seanceId) => 
   api.post(`/professeurs/${profId}/assign`, { seanceId });
 
+export const unassignProfesseurFromSeance = (seanceId) =>
+  api.delete(`/seances/${seanceId}/professeur`);
 
 export const getAllProfesseursWithPlanning = () =>
   api.get("/professeurs/all/plannings");

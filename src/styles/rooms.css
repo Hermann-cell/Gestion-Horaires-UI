@@ -382,6 +382,65 @@
   filter: brightness(0.95);
 }
 
+.btn-danger {
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.95);
+}
+
+.assigned-list {
+  display: grid;
+  gap: 12px;
+}
+
+.assigned-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.assigned-info {
+  flex: 1;
+}
+
+.assigned-dot {
+  width: 10px;
+  height: 10px;
+  background: #1f3f8a;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.assigned-remove {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 8px 12px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.assigned-remove:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
 /* DETAIL */
 .room-detail-card {
   background: #ffffff;

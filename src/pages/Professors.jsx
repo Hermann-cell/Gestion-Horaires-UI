@@ -111,6 +111,25 @@ export default function Professors() {
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState("");
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getProfesseurs();
+        setProfesseurs(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Erreur chargement professeurs", err);
+        errorToast("Erreur lors du chargement des professeurs");
+      }
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
   const loadProfesseurs = async () => {
     try {
       const data = await getProfesseurs();
@@ -120,16 +139,6 @@ export default function Professors() {
       errorToast("Erreur lors du chargement des professeurs");
     }
   };
-
-  useEffect(() => {
-    loadProfesseurs();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, []);
 
   const filteredProfesseurs = useMemo(() => {
     const q = query.trim().toLowerCase();

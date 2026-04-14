@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProfesseurById, updateProfesseur, assignProfesseurToSeance } from "../api/professeurApi";
+import { getProfesseurById, updateProfesseur, assignProfesseurToSeance, unassignProfesseurFromSeance } from "../api/professeurApi";
 import { successToast, errorToast } from "../utils/toastServices.js";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AssignmentModal from "../components/AssignmentModal";
-import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList } from "react-icons/fi";
+import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList, FiTrash2 } from "react-icons/fi";
 import "../styles/rooms.css";
 import "../styles/calendar.css";
 
@@ -25,8 +25,9 @@ export default function ProfessorDetail() {
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isUnassigning, setIsUnassigning] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getProfesseurById(id);
@@ -34,21 +35,25 @@ export default function ProfessorDetail() {
       setProfesseur(data);
 
       const initial = [];
-      data?.disponibilite_professeurs?.forEach(dp => {
-        const jour = dp.disponibilite?.jour;
-        dp.disponibilite?.plageHoraire_Disponibilites?.forEach(phd => {
+
+      data?.disponibilites?.forEach(d => {
+        const jour = d.jour;
+
+        d.plageHoraire_Disponibilites?.forEach(phd => {
           if (phd.plageHoraire) {
             const h = new Date(phd.plageHoraire.heure_debut).getHours();
             initial.push(`${jour}-${h}h`);
           }
         });
       });
-      setSelectedSlots(initial);
-    } catch (err) { errorToast("Erreur de chargement"); }
-    finally { setLoading(false); }
-  };
 
-  useEffect(() => { loadData(); }, [id]);
+      setSelectedSlots(initial);
+
+    } catch { errorToast("Erreur de chargement"); }
+    finally { setLoading(false); }
+  }, [id]);
+
+  useEffect(() => { loadData(); }, [id, loadData]);
 
   const handleSavePlanning = async () => {
     try {
@@ -75,15 +80,83 @@ export default function ProfessorDetail() {
     }
   };
 
-  const handleAssignSubmit = async (seanceId) => {
-    setIsAssigning(true);
+  const handleUnassignSubmit = async (seanceId) => {
+    if (!seanceId || !Number.isInteger(seanceId)) {
+      errorToast("Séance invalide");
+      return;
+    }
+
+    setIsUnassigning(true);
     try {
-      await assignProfesseurToSeance(id, seanceId);
-      successToast("Affectation réussie");
+      const response = await unassignProfesseurFromSeance(seanceId);
+      const message = response?.data?.message || response?.message || "Désaffectation réussie";
+      successToast(message);
+      await loadData();
+    } catch (error) {
+      console.error("Erreur désaffectation :", error);
+      const message = error?.response?.data?.message || error?.message || "Erreur lors de la désaffectation";
+      errorToast(message);
+    } finally {
+      setIsUnassigning(false);
+    }
+  };
+
+  const handleAssignSubmit = async (seanceId) => {
+    if (!seanceId || !Number.isInteger(seanceId)) {
+      errorToast("Séance invalide");
+      return;
+    }
+
+    setIsAssigning(true);
+
+    try {
+      const response = await assignProfesseurToSeance(id, seanceId);
+
+      //  gérer axios OU fetch
+      const message =
+        response?.data?.message || // axios classique
+        response?.message ||      // fallback
+        "Affectation réussie";
+
+      successToast(message);
+
+      // UX fluide
       setIsModalOpen(false);
-      loadData();
-    } catch (err) { errorToast("Erreur lors de l'affectation"); }
-    finally { setIsAssigning(false); }
+
+      //  refresh silencieux
+      await loadData();
+
+    } catch (error) {
+      console.error("Erreur assignation:", error);
+
+      //  extraction intelligente des erreurs backend
+      let message = "Erreur lors de l'affectation";
+
+      if (error?.response) {
+        // Axios
+        message =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          message;
+      } else if (error?.message) {
+        // JS classique
+        message = error.message;
+      }
+
+      //  gestion spécifique (option UX)
+      if (message.toLowerCase().includes("conflit")) {
+        errorToast("⚠️ " + message);
+      } else if (message.toLowerCase().includes("disponible")) {
+        errorToast("📅 " + message);
+      } else if (message.toLowerCase().includes("qualifié")) {
+        errorToast("🎓 " + message);
+      } else {
+        errorToast(message);
+      }
+
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
   if (loading) return <div className="p-5 text-center">Chargement...</div>;
@@ -124,15 +197,34 @@ export default function ProfessorDetail() {
               <div className="courses-sidebar">
                 <h5 className="section-title"><FiList /> Cours assignés</h5>
                 <div className="assigned-list">
-                  {professeur.seances?.length > 0 ? professeur.seances.map(s => (
-                    <div key={s.id} className="assigned-item">
-                      <div className="assigned-dot"></div>
-                      <div className="assigned-info">
-                        <strong>{s.cours?.nom}</strong>
-                        <p>{s.disponibilite?.jour} • {new Date(s.plageHoraire?.heure_debut).getHours()}h</p>
+                  {professeur.seances?.length > 0 ? professeur.seances.map(s => {
+                    const seanceDate = new Date(s.date).toLocaleDateString("fr-CA", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "2-digit",
+                    });
+                    const timeLabel = s.plageHoraire
+                      ? `${formatHeure(s.plageHoraire.heure_debut)} - ${formatHeure(s.plageHoraire.heure_fin)}`
+                      : "Horaire inconnu";
+
+                    return (
+                      <div key={s.id} className="assigned-item">
+                        <div className="assigned-dot"></div>
+                        <div className="assigned-info">
+                          <strong>{s.cours?.nom}</strong>
+                          <p>{seanceDate} • {timeLabel}</p>
+                        </div>
+                        <button
+                          className="assigned-remove btn-danger"
+                          onClick={() => handleUnassignSubmit(s.id)}
+                          disabled={isUnassigning}
+                          title="Retirer le professeur de cette séance"
+                        >
+                          <FiTrash2 /> Retirer
+                        </button>
                       </div>
-                    </div>
-                  )) : <p className="text-muted small">Aucun cours pour le moment.</p>}
+                    );
+                  }) : <p className="text-muted small">Aucun cours pour le moment.</p>}
                 </div>
               </div>
             </div>

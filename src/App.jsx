@@ -24,6 +24,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Courses from "./pages/Courses.jsx";
 import CourseDetail from "./pages/CourseDetail.jsx";
 import ChangePassword from "./pages/ChangePassword";
+import Seances from "./pages/Seances.jsx";
 
 export default function App() {
   return (
@@ -55,7 +56,11 @@ export default function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
+          <Route path="/users" element={
+            <ProtectedRoute roles={["Administrateur"]}>
+              <Users />
+            </ProtectedRoute>
+          } />
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/professors" element={<Professors />} />
@@ -66,6 +71,7 @@ export default function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
            <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/seances" element={<Seances />} />
         </Route>
 
         {/* Fallback */}
