@@ -37,12 +37,16 @@ export default function ProfessorDetail() {
       const initial = [];
 
       data?.disponibilites?.forEach(d => {
-        const jour = d.jour;
+        const jour = d.jour?.toLowerCase(); // Normaliser en minuscules comme le backend
 
         d.plageHoraire_Disponibilites?.forEach(phd => {
           if (phd.plageHoraire) {
-            const h = new Date(phd.plageHoraire.heure_debut).getHours();
-            initial.push(`${jour}-${h}h`);
+            // Extraire l'heure de manière robuste (éviter les problèmes de timezone)
+            const heureDebut = new Date(phd.plageHoraire.heure_debut);
+            const h = heureDebut.getHours();
+            if (jour && !isNaN(h)) {
+              initial.push(`${jour}-${h}h`);
+            }
           }
         });
       });
@@ -70,10 +74,33 @@ export default function ProfessorDetail() {
         })
       };
 
-      await updateProfesseur(id, payload);
+      const response = await updateProfesseur(id, payload);
+      // Le backend retourne { message: "...", data: professeur }
+      const updatedProfesseur = response?.data?.data || response?.data || response;
+      
+      // Mettre à jour le professeur avec les données retournées par l'API
+      if (updatedProfesseur) {
+        setProfesseur(updatedProfesseur);
+        
+        // Recalculer les slots sélectionnés depuis les données fraîches
+        const initial = [];
+        updatedProfesseur?.disponibilites?.forEach(d => {
+          const jour = d.jour?.toLowerCase(); // Normaliser en minuscules
+          d.plageHoraire_Disponibilites?.forEach(phd => {
+            if (phd.plageHoraire) {
+              const heureDebut = new Date(phd.plageHoraire.heure_debut);
+              const h = heureDebut.getHours();
+              if (jour && !isNaN(h)) {
+                initial.push(`${jour}-${h}h`);
+              }
+            }
+          });
+        });
+        setSelectedSlots(initial);
+      }
+      
       successToast("Planning sauvegardé avec succès");
       setIsEditing(false);
-      loadData();
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Erreur de sauvegarde";
       errorToast(errorMsg);

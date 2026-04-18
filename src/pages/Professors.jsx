@@ -10,12 +10,15 @@ import {
   deleteProfesseur,
 } from "../api/professeurApi";
 
+import { getSpecialites } from "../api/specialiteApi";
+
 import { successToast, errorToast } from "../utils/toastServices.js";
 
 const emptyForm = {
   id: null,
   prenom: "",
   nom: "",
+  specialiteId: null,
 };
 
 function ProfessorRow({
@@ -103,6 +106,7 @@ export default function Professors() {
   const navigate = useNavigate();
 
   const [professeurs, setProfesseurs] = useState([]);
+  const [specialites, setSpecialites] = useState([]);
   const [query, setQuery] = useState("");
 
   const [open, setOpen] = useState(false);
@@ -114,11 +118,19 @@ export default function Professors() {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await getProfesseurs();
-        setProfesseurs(Array.isArray(data) ? data : []);
+        const [profsData, specsData] = await Promise.all([
+          getProfesseurs(),
+          getSpecialites(),
+        ]);
+        setProfesseurs(Array.isArray(profsData) ? profsData : []);
+        setSpecialites(Array.isArray(specsData) ? specsData : specsData?.data || []);
       } catch (err) {
-        console.error("Erreur chargement professeurs", err);
-        errorToast("Erreur lors du chargement des professeurs");
+        console.error("Erreur chargement", err);
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Erreur lors du chargement";
+        errorToast(errorMessage);
       }
     };
     load();
@@ -167,10 +179,12 @@ export default function Professors() {
   const openEditModal = (professeur) => {
     setMode("edit");
     setFormError("");
+    const specialiteId = professeur.specialite_professeurs?.[0]?.specialiteId || null;
     setForm({
       id: professeur.id,
       prenom: professeur.prenom ?? "",
       nom: professeur.nom ?? "",
+      specialiteId: specialiteId,
     });
     setOpen(true);
   };
@@ -186,10 +200,11 @@ export default function Professors() {
       setOpenMenuId(null);
     } catch (err) {
       console.error("Erreur suppression professeur :", err);
-      console.error("Response :", err?.response);
-      console.error("Status :", err?.response?.status);
-      console.error("Data :", err?.response?.data);
-      errorToast(err?.response?.data?.message || "Erreur lors de la suppression");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Erreur lors de la suppression";
+      errorToast(errorMessage);
     }
   };
 
@@ -201,17 +216,17 @@ export default function Professors() {
     e.preventDefault();
     setFormError("");
 
-    const prenomTrim = form.prenom.trim();
     const nomTrim = form.nom.trim();
 
-    if (!prenomTrim || !nomTrim) {
-      setFormError("Veuillez remplir tous les champs obligatoires.");
+    if (!nomTrim || !form.specialiteId) {
+      setFormError("Le nom et la spécialité sont obligatoires.");
       return;
     }
 
     const payload = {
-      prenom: prenomTrim,
+      prenom: form.prenom.trim(),
       nom: nomTrim,
+      specialiteIds: [Number(form.specialiteId)],
     };
 
     try {
@@ -228,16 +243,13 @@ export default function Professors() {
       await loadProfesseurs();
     } catch (err) {
       console.error("Erreur sauvegarde professeur", err);
-      console.error("Response :", err?.response);
-      console.error("Status :", err?.response?.status);
-      console.error("Data :", err?.response?.data);
-
-      setFormError(
-        mode === "create"
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        (mode === "create"
           ? "Erreur lors de la création."
-          : "Erreur lors de la modification."
-      );
-      errorToast("Erreur lors de l'opération.");
+          : "Erreur lors de la modification.");
+      setFormError(errorMessage);
     }
   };
 
@@ -333,9 +345,7 @@ export default function Professors() {
                 </p>
 
                 <div className="modal-field">
-                  <label>
-                    <span className="required-star">*</span> Prénom
-                  </label>
+                  <label>Prénom</label>
                   <input
                     value={form.prenom}
                     onChange={(e) => onChange("prenom", e.target.value)}
@@ -352,6 +362,23 @@ export default function Professors() {
                     onChange={(e) => onChange("nom", e.target.value)}
                     placeholder="Ex: Boyomo"
                   />
+                </div>
+
+                <div className="modal-field">
+                  <label>
+                    <span className="required-star">*</span> Spécialité
+                  </label>
+                  <select
+                    value={form.specialiteId || ""}
+                    onChange={(e) => onChange("specialiteId", e.target.value ? Number(e.target.value) : null)}
+                  >
+                    <option value="">Sélectionner une spécialité...</option>
+                    {specialites.map((spec) => (
+                      <option key={spec.id} value={spec.id}>
+                        {spec.nom}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {formError && <div className="modal-error">{formError}</div>}

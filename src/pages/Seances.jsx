@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   getSeances,
@@ -55,7 +56,6 @@ function SeanceRow({
   seance,
   onEdit,
   onDelete,
-  onAssign,
   openMenuId,
   setOpenMenuId,
 }) {
@@ -120,7 +120,7 @@ function SeanceRow({
                   type="button"
                   onClick={() => {
                     setOpenMenuId(null);
-                    onAssign(seance);
+                    onEdit(seance);
                   }}
                 >
                   <FiPlus /> Assigner professeur
@@ -135,9 +135,13 @@ function SeanceRow({
                     try {
                       await unassignProfesseurFromSeance(seance.id);
                       successToast("Professeur retiré");
-                      onDelete(null); // Force refresh
+                      await loadData(); // Recharge les données
                     } catch (err) {
-                      errorToast(err.response?.data?.message || "Erreur");
+                      const errorMessage =
+                        err?.response?.data?.message ||
+                        err?.message ||
+                        "Erreur lors du retrait";
+                      errorToast(errorMessage);
                     }
                   }}
                   className="danger"
@@ -206,7 +210,11 @@ export default function Seances() {
       setPlageHoraires(Array.isArray(plagesRes) ? plagesRes : plagesRes.data || []);
     } catch (err) {
       console.error("Erreur chargement:", err);
-      errorToast("Erreur lors du chargement des données");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Erreur lors du chargement des données";
+      errorToast(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -302,7 +310,7 @@ export default function Seances() {
     try {
       const getAuteur = () => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        return user.prenom ? `${user.prenom} ${user.nom}` : "Admin";
+        return user.prenom && user.nom ? `${user.prenom} ${user.nom}`.trim() : "Admin";
       };
 
       const payload = {
@@ -310,7 +318,7 @@ export default function Seances() {
         coursId: Number(form.coursId),
         salleId: Number(form.salleId),
         plageHoraireId: Number(form.plageHoraireId),
-        ...(form.professeurId && { professeurId: Number(form.professeurId) }),
+        ...(form.professeurId ? { professeurId: Number(form.professeurId) } : {}),
         ...(mode === "edit" ? { modifierPar: getAuteur() } : { creerPar: getAuteur() }),
       };
 
@@ -327,9 +335,12 @@ export default function Seances() {
       await loadData();
     } catch (error) {
       console.error("Erreur:", error);
-      setFormError(
-        error.response?.data?.message || "Erreur lors de la sauvegarde"
-      );
+      // Extraire le message d'erreur depuis différentes sources possibles
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Erreur lors de la sauvegarde";
+      setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -347,7 +358,11 @@ export default function Seances() {
       setOpenMenuId(null);
     } catch (err) {
       console.error("Erreur suppression:", err);
-      errorToast(err.response?.data?.message || "Erreur suppression");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Erreur lors de la suppression";
+      errorToast(errorMessage);
     }
   };
 
@@ -528,7 +543,6 @@ export default function Seances() {
                     seance={seance}
                     onEdit={handleOpenModal}
                     onDelete={handleDelete}
-                    onAssign={() => alert("Utilisez le menu pour assigner")}
                     openMenuId={openMenuId}
                     setOpenMenuId={setOpenMenuId}
                   />
@@ -543,24 +557,25 @@ export default function Seances() {
         )}
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <>
-          <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
-          <div className="seances-modal">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h3>{mode === "create" ? "Créer une séance" : "Modifier la séance"}</h3>
-                <button
-                  className="btn-close"
-                  onClick={() => setIsModalOpen(false)}
-                  type="button"
-                >
-                  <FiX />
-                </button>
-              </div>
+      {/* Modal - rendered via portal */}
+      {isModalOpen &&
+        createPortal(
+          <>
+            <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}></div>
+            <div className="seances-modal">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3>{mode === "create" ? "Créer une séance" : "Modifier la séance"}</h3>
+                  <button
+                    className="btn-close"
+                    onClick={() => setIsModalOpen(false)}
+                    type="button"
+                  >
+                    <FiX />
+                  </button>
+                </div>
 
-              <form onSubmit={handleSubmit} className="seances-form">
+                <form onSubmit={handleSubmit} className="seances-form">
                 {formError && <div className="form-error">{formError}</div>}
 
                 <div className="form-group">
@@ -657,8 +672,9 @@ export default function Seances() {
               </form>
             </div>
           </div>
-        </>
-      )}
+          </>,
+          document.body
+        )}
     </div>
   );
 }

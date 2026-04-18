@@ -2,6 +2,21 @@
 
 const BASE_URL = "http://localhost:3000/api";
 
+// Classe d'erreur personnalisée pour les erreurs API
+class ApiError extends Error {
+  constructor(message, data = {}, status = 500) {
+    super(message);
+    this.name = "ApiError";
+    this.response = {
+      data: {
+        message: message,
+        ...data,
+      },
+      status: status,
+    };
+  }
+}
+
 async function request(url, method = "GET", body = null) {
   const token = localStorage.getItem("token");
 
@@ -29,7 +44,8 @@ async function request(url, method = "GET", body = null) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.error || data?.message || "Erreur API");
+    const errorMessage = data?.message || data?.error || "Erreur API";
+    throw new ApiError(errorMessage, data, response.status);
   }
 
   return data;
