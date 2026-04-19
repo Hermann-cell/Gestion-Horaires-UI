@@ -29,6 +29,9 @@ export default function CourseDetail() {
           duree: data.duree,
           etape: data.etape,
           est_harchive: data.est_harchive,
+          specialite: data.specialite,
+          typeDeSalle: data.typeDeSalle,
+          cours_programmes: data.cours_programmes || [],
         });
       } catch (err) {
         console.error("Erreur chargement cours", err);
@@ -79,7 +82,7 @@ export default function CourseDetail() {
             <div className="room-detail-item">
               <span className="detail-label">Durée</span>
               <span className="detail-value">
-                {course?.duree || "-"}
+                {course?.duree ? `${course.duree} minutes` : "-"}
               </span>
             </div>
 
@@ -89,6 +92,32 @@ export default function CourseDetail() {
                 {course?.etape || "-"}
               </span>
             </div>
+
+            <div className="room-detail-item">
+              <span className="detail-label">Spécialité</span>
+              <span className="detail-value">
+                {course?.specialite?.nom || "Non assignée"}
+              </span>
+            </div>
+
+            <div className="room-detail-item">
+              <span className="detail-label">Type de salle</span>
+              <span className="detail-value">
+                {course?.typeDeSalle?.nom || "Non spécifié"}
+              </span>
+            </div>
+
+            {course?.cours_programmes && course.cours_programmes.length > 0 && (
+              <div className="room-detail-item">
+                <span className="detail-label">Programmes</span>
+                <span className="detail-value">
+                  {course.cours_programmes
+                    .map((cp) => cp.programme?.nom)
+                    .filter(Boolean)
+                    .join(", ") || "Aucun programme assigné"}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="room-detail-description">

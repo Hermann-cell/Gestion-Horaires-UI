@@ -29,6 +29,8 @@ export default function TopNavbar() {
         return "Gestion des Séances";
       case "/planning":
         return "Planning";
+      case "/planning-enseignants":
+        return "Planning des Enseignants";
       case "/courses":
         return "Gestion des cours";
       case "/profile":
