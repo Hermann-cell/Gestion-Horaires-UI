@@ -35,6 +35,8 @@ export default function TopNavbar() {
         return "Gestion des cours";
       case "/profile":
         return "Profil utilisateur";
+      case "/change-password":
+        return "Changer le mot de passe";
       default:
         return "Dashboard";
     }
