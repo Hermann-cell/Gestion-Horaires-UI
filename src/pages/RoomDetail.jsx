@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import "../styles/rooms.css";
+import "@/styles/rooms.css";
 
 export default function RoomDetail() {
   const navigate = useNavigate();

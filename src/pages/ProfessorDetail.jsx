@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProfesseurById, updateProfesseur, assignProfesseurToSeance, unassignProfesseurFromSeance } from "../api/professeurApi";
-import { successToast, errorToast } from "../utils/toastServices.js";
-import { generateProfessorAvailabilityPDF } from "../utils/generateProfessorAvailabilityPDF.js";
-import TimeSlotGrid from "../components/TimeSlotGrid";
-import AssignmentModal from "../components/AssignmentModal";
+import { getProfesseurById, updateProfesseur, assignProfesseurToSeance, unassignProfesseurFromSeance } from "@/api/professeurApi";
+import { successToast, errorToast } from "@/utils/toastServices.js";
+import { generateProfessorAvailabilityPDF } from "@/utils/generateProfessorAvailabilityPDF.js";
+import TimeSlotGrid from "@/components/TimeSlotGrid";
+import AssignmentModal from "@/components/AssignmentModal";
 import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList, FiTrash2, FiDownload } from "react-icons/fi";
-import "../styles/rooms.css";
-import "../styles/calendar.css";
+import "@/styles/rooms.css";
+import "@/styles/calendar.css";
 
 
 const formatHeure = (dateString) => {

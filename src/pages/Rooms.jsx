@@ -1,10 +1,10 @@
 // src/pages/Rooms.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/rooms.css";
+import "@/styles/rooms.css";
 import { FiSearch } from "react-icons/fi";
-import RoomTable from "../components/RoomTable.jsx";
-import * as salleApi from "../api/salleApi";
+import RoomTable from "@/components/RoomTable.jsx";
+import * as salleApi from "@/api/salleApi";
 import { ToastContainer, toast } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";

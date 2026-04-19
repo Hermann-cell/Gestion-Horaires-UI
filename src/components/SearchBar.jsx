@@ -1,7 +1,7 @@
 import React from "react";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { X, Search } from "lucide-react";
-import "../styles/searchbar.css";
+import "@/styles/searchbar.css";
 
 export default function SearchBar({ value, onChange }) {
   return (

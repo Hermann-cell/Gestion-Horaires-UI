@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import "../styles/Login.css";
+import "@/styles/Login.css";
 import * as api from "@/api/authApi.js";
 import { successToast, errorToast } from "@/utils/toastServices.js";
 

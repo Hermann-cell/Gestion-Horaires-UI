@@ -8,13 +8,13 @@ import {
   deleteSeance,
   assignProfesseurToSeance,
   unassignProfesseurFromSeance,
-} from "../api/seanceApi";
-import { getProfesseurs } from "../api/professeurApi";
-import { getSalles } from "../api/salleApi";
-import { getCours } from "../api/coursApi";
-import { getPlageHoraires } from "../api/plageHoraireApi";
-import { successToast, errorToast } from "../utils/toastServices.js";
-import { generateSeancesPDF } from "../utils/generateSeancesPDF.js";
+} from "@/api/seanceApi";
+import { getProfesseurs } from "@/api/professeurApi";
+import { getSalles } from "@/api/salleApi";
+import { getCours } from "@/api/coursApi";
+import { getPlageHoraires } from "@/api/plageHoraireApi";
+import { successToast, errorToast } from "@/utils/toastServices.js";
+import { generateSeancesPDF } from "@/utils/generateSeancesPDF.js";
 import {
   FiPlus,
   FiEdit2,
@@ -27,7 +27,7 @@ import {
   FiArrowDown,
   FiDownload,
 } from "react-icons/fi";
-import "../styles/seances.css";
+import "@/styles/seances.css";
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("fr-CA", {

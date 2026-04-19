@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "../styles/users.css";
+import "@/styles/users.css";
 import { FiSearch, FiMoreHorizontal } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
@@ -8,11 +8,11 @@ import {
   createProfesseur,
   updateProfesseur,
   deleteProfesseur,
-} from "../api/professeurApi";
+} from "@/api/professeurApi";
 
-import { getSpecialites } from "../api/specialiteApi";
+import { getSpecialites } from "@/api/specialiteApi";
 
-import { successToast, errorToast } from "../utils/toastServices.js";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 
 const emptyForm = {
   id: null,

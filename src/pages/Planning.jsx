@@ -3,7 +3,7 @@ import { getSeances } from "@/api/seanceApi";
 import { generateAcademicPlanningPDF } from "@/utils/generateAcademicPlanningPDF.js";
 import { successToast, errorToast } from "@/utils/toastServices.js";
 import { FiDownload } from "react-icons/fi";
-import "../styles/planning.css";
+import "@/styles/planning.css";
 
 const MONTHS = [
   "Janvier",

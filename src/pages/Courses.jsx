@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/rooms.css";
+import "@/styles/rooms.css";
 import { FiSearch } from "react-icons/fi";
 import DataTable from "@/components/DataTable.jsx";
 import * as coursApi from "@/api/coursApi";

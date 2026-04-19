@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import "../styles/users.css";
+import "@/styles/users.css";
 import { FiSearch } from "react-icons/fi";
 import UserTable from "@/components/UserTable.jsx";
 import { Modal, Button } from "react-bootstrap";

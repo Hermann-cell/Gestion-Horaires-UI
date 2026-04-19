@@ -12,8 +12,8 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { updateUser, getUserById } from "../api/userApi";
-import "../styles/Profile.css";
+import { updateUser, getUserById } from "@/api/userApi";
+import "@/styles/Profile.css";
 
 export default function Profile() {
   const [user, setUser] = useState(null);

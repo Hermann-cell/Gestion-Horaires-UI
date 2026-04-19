@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getAllProfesseursWithPlanning } from "../api/professeurApi";
-import { successToast, errorToast } from "../utils/toastServices.js";
+import { getAllProfesseursWithPlanning } from "@/api/professeurApi";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 import { FiCalendar, FiUsers, FiRefreshCw, FiSearch, FiFilter, FiList, FiGrid, FiDownload } from "react-icons/fi";
-import { generateTeacherPlanningPDF } from "../utils/generateTeacherPlanningPDF.js";
-import "../styles/calendar.css";
-import "../styles/rooms.css";
+import { generateTeacherPlanningPDF } from "@/utils/generateTeacherPlanningPDF.js";
+import "@/styles/calendar.css";
+import "@/styles/rooms.css";
 
 const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 const HEURES = Array.from({ length: 14 }, (_, i) => i + 8);

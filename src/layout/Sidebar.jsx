@@ -9,9 +9,9 @@ import {
   BsBoxArrowRight,
   BsBook,
 } from "react-icons/bs";
-import logo from "../assets/logo.jpg";
-import "../styles/sidebar.css";
-import { useAuth } from "../auth/useAuth.js";  
+import logo from "@/assets/logo.jpg";
+import "@/styles/sidebar.css";
+import { useAuth } from "@/auth/useAuth.js";  
 
 export default function Sidebar() {
   const navigate = useNavigate();

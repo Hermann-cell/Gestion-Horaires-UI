@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAvailableSeances } from "../api/professeurApi";
+import { getAvailableSeances } from "@/api/professeurApi";
 import { FiBook, FiClock, FiX, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 export default function AssignmentModal({ isOpen, onClose, onAssign, isSubmitting }) {
