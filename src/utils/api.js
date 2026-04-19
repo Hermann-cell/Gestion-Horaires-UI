@@ -1,6 +1,6 @@
 // src/utils/api.js
 
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000/api";
 
 // Classe d'erreur personnalisée pour les erreurs API
 class ApiError extends Error {
