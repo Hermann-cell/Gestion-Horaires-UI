@@ -14,6 +14,7 @@ import { getSalles } from "../api/salleApi";
 import { getCours } from "../api/coursApi";
 import { getPlageHoraires } from "../api/plageHoraireApi";
 import { successToast, errorToast } from "../utils/toastServices.js";
+import { generateSeancesPDF } from "../utils/generateSeancesPDF.js";
 import {
   FiPlus,
   FiEdit2,
@@ -24,6 +25,7 @@ import {
   FiSearch,
   FiArrowUp,
   FiArrowDown,
+  FiDownload,
 } from "react-icons/fi";
 import "../styles/seances.css";
 
@@ -180,6 +182,7 @@ export default function Seances() {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [mode, setMode] = useState("create");
 
   const [form, setForm] = useState(emptyForm);
@@ -366,6 +369,32 @@ export default function Seances() {
     }
   };
 
+  const handleExportSeancesPDF = async () => {
+    try {
+      setIsExportingPDF(true);
+
+      const seancesData = filteredSeances.map((seance) => ({
+        cours: seance.cours?.nom || "N/A",
+        codeCours: seance.cours?.code || "",
+        professeur: seance.professeur
+          ? `${seance.professeur.prenom} ${seance.professeur.nom}`.trim()
+          : "Non assigné",
+        salle: seance.salle?.code || "N/A",
+        date: seance.date,
+        heureDebut: seance.plageHoraire?.heure_debut,
+        heureFin: seance.plageHoraire?.heure_fin,
+      }));
+
+      const filename = `Seances_${new Date().toISOString().split("T")[0]}.pdf`;
+      await generateSeancesPDF(seancesData, filename);
+    } catch (err) {
+      console.error("Erreur export PDF:", err);
+      errorToast("Erreur lors de l'exportation du PDF");
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   // Filter and sort
   const filteredSeances = useMemo(() => {
     let result = [...seances];
@@ -443,13 +472,25 @@ export default function Seances() {
           <h2 className="seances-title">
             <FiFilter /> Gestion des séances de cours
           </h2>
-          <button
-            className="btn-primary-lg"
-            onClick={() => handleOpenModal()}
-            type="button"
-          >
-            <FiPlus /> Créer une séance
-          </button>
+          <div className="d-flex gap-2">
+            <button
+              className="btn-primary-lg"
+              onClick={() => handleOpenModal()}
+              type="button"
+            >
+              <FiPlus /> Créer une séance
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={handleExportSeancesPDF}
+              disabled={isExportingPDF || seances.length === 0}
+              type="button"
+              title="Exporter les séances en PDF"
+            >
+              <FiDownload size={16} className="me-1" />
+              {isExportingPDF ? "Export..." : "Export PDF"}
+            </button>
+          </div>
         </div>
 
         {/* Quick Stats */}

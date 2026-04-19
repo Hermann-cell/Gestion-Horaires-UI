@@ -2,9 +2,10 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getProfesseurById, updateProfesseur, assignProfesseurToSeance, unassignProfesseurFromSeance } from "../api/professeurApi";
 import { successToast, errorToast } from "../utils/toastServices.js";
+import { generateProfessorAvailabilityPDF } from "../utils/generateProfessorAvailabilityPDF.js";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AssignmentModal from "../components/AssignmentModal";
-import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList, FiTrash2 } from "react-icons/fi";
+import { FiCalendar, FiRefreshCw, FiArrowLeft, FiSave, FiPlusCircle, FiList, FiTrash2, FiDownload } from "react-icons/fi";
 import "../styles/rooms.css";
 import "../styles/calendar.css";
 
@@ -26,6 +27,7 @@ export default function ProfessorDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isUnassigning, setIsUnassigning] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -186,6 +188,50 @@ export default function ProfessorDetail() {
     }
   };
 
+  const handleExportAvailability = async () => {
+    if (!professeur) return;
+    try {
+      setIsExportingPDF(true);
+
+      const professorName = `${professeur.prenom || ""} ${professeur.nom || ""}`.trim();
+      const specialities =
+        professeur.specialite_professeurs
+          ?.map((item) => item.specialite?.nom)
+          .filter(Boolean)
+          .join(", ") || "Non assignée";
+
+      // Transformer les disponibilités en format simplifié
+      const availabilities = [];
+      professeur.disponibilites?.forEach((dispo) => {
+        dispo.plageHoraire_Disponibilites?.forEach((phd) => {
+          if (phd.plageHoraire) {
+            availabilities.push({
+              jour: dispo.jour,
+              heureDebut: phd.plageHoraire.heure_debut,
+              heureFin: phd.plageHoraire.heure_fin,
+            });
+          }
+        });
+      });
+
+      const filename = `Disponibilites_${professorName.replace(/\s+/g, "_")}_${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+
+      await generateProfessorAvailabilityPDF(
+        professorName,
+        specialities,
+        availabilities,
+        filename
+      );
+    } catch (err) {
+      console.error("Erreur export PDF:", err);
+      errorToast("Erreur lors de l'exportation du PDF");
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   if (loading) return <div className="p-5 text-center">Chargement...</div>;
 
   return (
@@ -209,6 +255,15 @@ export default function ProfessorDetail() {
               ) : (
                 <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier Planning</button>
               )}
+              <button
+                className="btn btn-success"
+                onClick={handleExportAvailability}
+                disabled={isExportingPDF}
+                title="Exporter les disponibilités en PDF"
+              >
+                <FiDownload size={16} className="me-1" />
+                {isExportingPDF ? "Export..." : "Export PDF"}
+              </button>
             </div>
           </div>
 

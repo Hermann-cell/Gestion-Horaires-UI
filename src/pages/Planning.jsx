@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSeances } from "../api/seanceApi";
+import { generateAcademicPlanningPDF } from "../utils/generateAcademicPlanningPDF.js";
+import { successToast, errorToast } from "../utils/toastServices.js";
+import { FiDownload } from "react-icons/fi";
 import "../styles/planning.css";
 
 const MONTHS = [
@@ -672,6 +675,7 @@ export default function Planning() {
   const [error, setError] = useState("");
   const [view, setView] = useState("week");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -769,6 +773,34 @@ export default function Planning() {
     setView("day");
   };
 
+  const handleExportPlanningPDF = async () => {
+    try {
+      setIsExportingPDF(true);
+
+      const planningData = filteredSeances.map((item) => ({
+        cours: item.coursNom || "N/A",
+        codeCours: item.coursCode || "",
+        professeur: item.professeur || "Non assigné",
+        salle: item.roomKey || "N/A",
+        etape: item.etape || "N/A",
+        date: item.dateObj,
+        heureDebut: item.startDate,
+        heureFin: item.endDate,
+      }));
+
+      const filename = `Planning_Academique_${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+
+      await generateAcademicPlanningPDF(planningData, filename);
+    } catch (err) {
+      console.error("Erreur export PDF:", err);
+      errorToast("Erreur lors de l'exportation du PDF");
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="planning-page">
@@ -830,8 +862,27 @@ export default function Planning() {
             onClick={() => setCurrentDate(new Date())}
           >
             Aujourd’hui
-          </button>
-        </div>
+          </button>          <button
+            type="button"
+            className="planning-export-btn"
+            onClick={handleExportPlanningPDF}
+            disabled={isExportingPDF || filteredSeances.length === 0}
+            style={{
+              backgroundColor: isExportingPDF ? "#ccc" : "#28a745",
+              color: "white",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              cursor: isExportingPDF ? "default" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontSize: "14px",
+            }}
+          >
+            <FiDownload size={16} />
+            {isExportingPDF ? "Export..." : "Export PDF"}
+          </button>        </div>
       </div>
 
       <div className="planning-filters-card">

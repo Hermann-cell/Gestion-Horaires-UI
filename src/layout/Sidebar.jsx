@@ -74,7 +74,7 @@ export default function Sidebar() {
           </NavLink>
 
           <NavLink to="/planning" className="sidebar-link">
-            <BsCalendarCheck /> Planning
+            <BsCalendarCheck /> Planning academique
           </NavLink>
 
           <NavLink to="/planning-enseignants" className="sidebar-link">
