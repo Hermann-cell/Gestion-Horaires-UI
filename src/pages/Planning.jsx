@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { getSeances } from "../api/seanceApi";
-import { generateAcademicPlanningPDF } from "../utils/generateAcademicPlanningPDF.js";
-import { successToast, errorToast } from "../utils/toastServices.js";
+import { getSeances } from "@/api/seanceApi";
+import { generateAcademicPlanningPDF } from "@/utils/generateAcademicPlanningPDF.js";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 import { FiDownload } from "react-icons/fi";
 import "../styles/planning.css";
 

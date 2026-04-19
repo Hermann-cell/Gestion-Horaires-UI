@@ -2,7 +2,7 @@ import { Dropdown, Modal, Button } from "react-bootstrap";
 import { BsPersonCircle } from "react-icons/bs";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { logoutUser } from "../api/authApi";
+import { logoutUser } from "@/api/authApi";
 
 export default function TopNavbar() {
   const location = useLocation();

@@ -8,10 +8,10 @@ import {
   BsPercent,
   BsClockHistory,
 } from "react-icons/bs";
-import StatCard from "../components/StatCard";
-import BarChartCard from "../components/BarChartCard";
-import DonutChartCard from "../components/DonutChartCard";
-import { dashboardApi } from "../api/dashboardApi";
+import StatCard from "@/components/StatCard";
+import BarChartCard from "@/components/BarChartCard";
+import DonutChartCard from "@/components/DonutChartCard";
+import { dashboardApi } from "@/api/dashboardApi";
 
 function formatDate(dateString) {
   if (!dateString) return "—";

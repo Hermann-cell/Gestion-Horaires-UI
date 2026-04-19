@@ -1,4 +1,4 @@
-import { api } from "../utils/api";
+import { api } from "@/utils/api";
 
 // ---------------- LOGIN ----------------
 export function loginUser(email, mot_de_passe) {

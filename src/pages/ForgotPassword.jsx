@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Login.css";
-import * as api from "../api/authApi.js";
-import { successToast, errorToast } from "../utils/toastServices.js";
+import * as api from "@/api/authApi.js";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");

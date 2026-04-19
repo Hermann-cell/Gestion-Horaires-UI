@@ -1,4 +1,4 @@
-import { api } from "../utils/api";
+import { api } from "@/utils/api";
 
 // Endpoint pour récupérer tous les professeurs
 export const getProfesseurs = () => api.get("/professeurs");

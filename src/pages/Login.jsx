@@ -4,8 +4,8 @@ import "../styles/Login.css";
 import bgImage from "../assets/login-bg.jpg";
 import logo from "../assets/logo.jpg";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { loginUser } from "../api/authApi";
-import { useAuth } from "../auth/useAuth.js";
+import { loginUser } from "@/api/authApi";
+import { useAuth } from "@/auth/useAuth.js";
 
 export default function Login() {
   const [email, setEmail] = useState("");

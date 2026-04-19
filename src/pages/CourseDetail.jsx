@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../styles/rooms.css";
-import * as coursApi from "../api/coursApi";
+import * as coursApi from "@/api/coursApi";
 
 export default function CourseDetail() {
   const navigate = useNavigate();

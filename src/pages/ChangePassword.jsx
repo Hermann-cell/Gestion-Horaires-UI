@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import "../styles/Login.css";
-import * as api from "../api/authApi.js";
-import { successToast, errorToast } from "../utils/toastServices.js";
+import * as api from "@/api/authApi.js";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 
 function ChangePassword() {
   const navigate = useNavigate();

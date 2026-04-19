@@ -1,12 +1,12 @@
 import React, { useMemo, useState, useEffect } from "react";
 import "../styles/users.css";
 import { FiSearch } from "react-icons/fi";
-import UserTable from "../components/UserTable.jsx";
+import UserTable from "@/components/UserTable.jsx";
 import { Modal, Button } from "react-bootstrap";
 
-import { getUsers, createUser, updateUser, deleteUser } from "../api/userApi";
-import { getRoles } from "../api/roleApi";
-import { successToast, errorToast } from "../utils/toastServices.js";
+import { getUsers, createUser, updateUser, deleteUser } from "@/api/userApi";
+import { getRoles } from "@/api/roleApi";
+import { successToast, errorToast } from "@/utils/toastServices.js";
 
 const emptyForm = {
   id: null,

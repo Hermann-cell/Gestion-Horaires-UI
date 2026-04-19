@@ -1,4 +1,4 @@
-import { api } from "../utils/api";
+import { api } from "@/utils/api";
 
 export function getCours() {
   return api.get("/cours");
