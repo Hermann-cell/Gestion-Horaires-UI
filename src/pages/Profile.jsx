@@ -13,7 +13,7 @@ import {
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { updateUser, getUserById } from "@/api/userApi";
-import "@/styles/Profile.css";
+import "@/styles/profile.css";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
