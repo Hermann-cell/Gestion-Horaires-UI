@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "@/styles/Login.css";
+import "@/styles/login.css";
 import bgImage from "@/assets/login-bg.jpg";
 import logo from "@/assets/logo.jpg";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
