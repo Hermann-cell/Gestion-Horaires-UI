@@ -187,27 +187,34 @@ export default function ProfessorDetail() {
 
   const handleExportAvailability = async () => {
     if (!professeur) return;
+
     try {
       setIsExportingPDF(true);
 
-      const professorName = `${professeur.prenom || ""} ${professeur.nom || ""}`.trim();
+      const professorName =
+        `${professeur.prenom || ""} ${professeur.nom || ""}`.trim();
+
       const specialities =
         professeur.specialite_professeurs
           ?.map((item) => item.specialite?.nom)
           .filter(Boolean)
           .join(", ") || "Non assignée";
 
-      // Transformer les disponibilités en format simplifié
+      // =========================
+      // 🔥 NORMALISATION SIMPLE (INT ONLY)
+      // =========================
       const availabilities = [];
+
       professeur.disponibilites?.forEach((dispo) => {
         dispo.plageHoraire_Disponibilites?.forEach((phd) => {
-          if (phd.plageHoraire) {
-            availabilities.push({
-              jour: dispo.jour,
-              heureDebut: Number(phd.plageHoraire.heure_debut),
-              heureFin: Number(phd.plageHoraire.heure_fin),
-            });
-          }
+          const plage = phd.plageHoraire;
+          if (!plage) return;
+
+          availabilities.push({
+            jour: dispo.jour,
+            heureDebut: Number(plage.heure_debut),
+            heureFin: Number(plage.heure_fin),
+          });
         });
       });
 
@@ -221,8 +228,10 @@ export default function ProfessorDetail() {
         availabilities,
         filename
       );
+
+      successToast("PDF généré avec succès");
     } catch (err) {
-      console.error("Erreur export PDF:", err);
+      console.error(err);
       errorToast("Erreur lors de l'exportation du PDF");
     } finally {
       setIsExportingPDF(false);
