@@ -8,7 +8,7 @@ export async function generateTeacherPlanningPDF(
   filename = "planning.pdf"
 ) {
   try {
-    // Créer un conteneur temporaire pour la conversion
+    // Conteneur temporaire
     const container = document.createElement("div");
     container.style.position = "absolute";
     container.style.left = "-9999px";
@@ -18,7 +18,9 @@ export async function generateTeacherPlanningPDF(
     container.style.fontFamily = "Arial, sans-serif";
     container.style.color = "#1e3a5f";
 
-    // En-tête
+    // =========================
+    // 🔹 HEADER
+    // =========================
     const header = document.createElement("div");
     header.style.borderBottom = "3px solid #1f3f8a";
     header.style.paddingBottom = "20px";
@@ -36,173 +38,189 @@ export async function generateTeacherPlanningPDF(
     teacherName.style.margin = "5px 0";
     teacherName.style.fontSize = "20px";
     teacherName.style.color = "#4e73df";
-    teacherName.style.fontWeight = "600";
 
     const teacherInfo = document.createElement("p");
     teacherInfo.style.margin = "10px 0 0 0";
     teacherInfo.style.fontSize = "14px";
     teacherInfo.style.color = "#666";
-    teacherInfo.innerHTML = `<strong>Spécialité(s):</strong> ${
-      specialites || "Non assignée"
-    }<br/><strong>Généré le:</strong> ${new Date().toLocaleDateString("fr-FR", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })}`;
+    teacherInfo.innerHTML = `
+      <strong>Spécialité(s):</strong> ${specialites || "Non assignée"}<br/>
+      <strong>Généré le:</strong> ${getTodayFR()}
+    `;
 
     header.appendChild(title);
     header.appendChild(teacherName);
     header.appendChild(teacherInfo);
     container.appendChild(header);
 
-    // Tableau des séances
-    const tableContainer = document.createElement("div");
-    tableContainer.style.marginTop = "20px";
-
+    // =========================
+    // 🔹 TABLE
+    // =========================
     const table = document.createElement("table");
     table.style.width = "100%";
     table.style.borderCollapse = "collapse";
-    table.style.marginBottom = "20px";
     table.style.fontSize = "13px";
 
-    // En-tête du tableau
+    const headers = [
+      "Date",
+      "Jour",
+      "Heure Début",
+      "Heure Fin",
+      "Cours",
+      "Code",
+      "Salle",
+    ];
+
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
     headerRow.style.backgroundColor = "#f0f3f8";
-    headerRow.style.borderBottom = "2px solid #1f3f8a";
 
-    const headers = ["Date", "Jour", "Heure Début", "Heure Fin", "Cours", "Code", "Salle"];
-    headers.forEach((headerText) => {
+    headers.forEach((text) => {
       const th = document.createElement("th");
-      th.textContent = headerText;
+      th.textContent = text;
       th.style.padding = "12px";
       th.style.textAlign = "left";
-      th.style.fontWeight = "bold";
       th.style.color = "#1f3f8a";
-      th.style.borderRight = "1px solid #e0e0e0";
       headerRow.appendChild(th);
     });
+
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // Corps du tableau
     const tbody = document.createElement("tbody");
-    let rowIndex = 0;
 
-    if (seances && seances.length > 0) {
-      seances.forEach((seance) => {
+    if (seances?.length) {
+      seances.forEach((s, i) => {
         const row = document.createElement("tr");
-        row.style.backgroundColor = rowIndex % 2 === 0 ? "white" : "#f9fafb";
-        row.style.borderBottom = "1px solid #e0e0e0";
+        row.style.backgroundColor = i % 2 === 0 ? "#fff" : "#f9fafb";
 
-        const date = formatDate(seance.date);
-        const day = getDayName(seance.date);
-        const timeStart = formatTime(seance.heureDebut);
-        const timeEnd = formatTime(seance.heureFin);
-        const coursNom = seance.cours || "N/A";
-        const coursCode = seance.codeCours || "-";
-        const salle = seance.salle || "N/A";
+        const values = [
+          formatDate(s.date),
+          getDayName(s.date),
+          formatTime(s.heureDebut),
+          formatTime(s.heureFin),
+          s.cours || "N/A",
+          s.codeCours || "-",
+          s.salle || "N/A",
+        ];
 
-        const cellData = [date, day, timeStart, timeEnd, coursNom, coursCode, salle];
-        cellData.forEach((data, idx) => {
+        values.forEach((val) => {
           const td = document.createElement("td");
-          td.textContent = data;
-          td.style.padding = "10px 12px";
-          td.style.borderRight = idx < cellData.length - 1 ? "1px solid #e0e0e0" : "none";
-          td.style.color = "#333";
+          td.textContent = val;
+          td.style.padding = "10px";
           row.appendChild(td);
         });
 
         tbody.appendChild(row);
-        rowIndex++;
       });
     } else {
       const row = document.createElement("tr");
       const td = document.createElement("td");
       td.colSpan = headers.length;
       td.textContent = "Aucune séance trouvée";
-      td.style.padding = "15px";
       td.style.textAlign = "center";
-      td.style.color = "#999";
+      td.style.padding = "15px";
       row.appendChild(td);
       tbody.appendChild(row);
     }
 
     table.appendChild(tbody);
-    tableContainer.appendChild(table);
-    container.appendChild(tableContainer);
+    container.appendChild(table);
 
-    // Pied de page
+    // =========================
+    // 🔹 FOOTER
+    // =========================
     const footer = document.createElement("div");
     footer.style.marginTop = "40px";
-    footer.style.borderTop = "1px solid #e0e0e0";
-    footer.style.paddingTop = "15px";
+    footer.style.textAlign = "center";
     footer.style.fontSize = "12px";
     footer.style.color = "#999";
-    footer.style.textAlign = "center";
     footer.innerHTML = `
-      <p style="margin: 5px 0;">Gestion d'horaire - Système de Planification</p>
-      <p style="margin: 0; font-size: 11px;">Ce document a été généré automatiquement et ne requiert pas de signature.</p>
+      <p>Gestion d'horaire - Système de Planification</p>
+      <p>Document généré automatiquement</p>
     `;
     container.appendChild(footer);
 
-    // Ajouter le conteneur au DOM temporairement
     document.body.appendChild(container);
 
-    // Convertir en canvas
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    });
-
-    // Créer le PDF
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+    // =========================
+    // 🔹 PDF
+    // =========================
+    const canvas = await html2canvas(container, { scale: 2 });
+    const pdf = new jsPDF();
 
     const imgData = canvas.toDataURL("image/png");
-    const imgWidth = 210; // Largeur A4 en mm
+    const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-
-    // Télécharger le PDF
     pdf.save(filename);
 
-    // Nettoyer
     document.body.removeChild(container);
 
     return true;
   } catch (error) {
-    console.error("Erreur lors de la génération du PDF:", error);
+    console.error("Erreur PDF:", error);
     throw error;
   }
 }
 
+// =========================
+// 🔹 UTILITAIRES
+// =========================
+function toDate(value) {
+  return value ? new Date(value) : null;
+}
+
 function formatDate(value) {
   if (!value) return "-";
-  return new Date(value).toLocaleDateString("fr-CA", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  return toDate(value).toLocaleDateString("fr-CA");
 }
 
 function getDayName(value) {
   if (!value) return "-";
-  const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-  return days[new Date(value).getDay()];
+
+  const days = [
+    "Dimanche",
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+  ];
+
+  return days[toDate(value).getDay()];
 }
 
 function formatTime(value) {
   if (!value) return "-";
-  return new Date(value).toLocaleTimeString("fr-CA", {
+
+  // ✅ Cas 1 : "08:00:00"
+  if (typeof value === "string" && value.includes(":")) {
+    return value.slice(0, 5); // → "08:00"
+  }
+
+  // ✅ Cas 2 : 8 ou 9 (number)
+  if (typeof value === "number") {
+    return `${String(value).padStart(2, "0")}:00`;
+  }
+
+  // ✅ Cas 3 : vraie date (fallback safe)
+  const date = new Date(value);
+
+  return date.toLocaleTimeString("fr-CA", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function getTodayFR() {
+  return new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }

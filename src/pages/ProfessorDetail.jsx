@@ -10,11 +10,12 @@ import "@/styles/rooms.css";
 import "@/styles/calendar.css";
 
 
-const formatHeure = (dateString) => {
-  return new Date(dateString).toLocaleTimeString("fr-CA", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const formatHeure = (hour) => {
+  const h = Number(hour);
+
+  if (isNaN(h)) return "--:--";
+
+  return `${String(h).padStart(2, "0")}:00`;
 };
 
 export default function ProfessorDetail() {
@@ -39,13 +40,15 @@ export default function ProfessorDetail() {
       const initial = [];
 
       data?.disponibilites?.forEach(d => {
-        const jour = d.jour?.toLowerCase(); // Normaliser en minuscules comme le backend
+        const jour = d.jour?.toLowerCase();
 
         d.plageHoraire_Disponibilites?.forEach(phd => {
           if (phd.plageHoraire) {
-            // Extraire l'heure de manière robuste (éviter les problèmes de timezone)
-            const heureDebut = new Date(phd.plageHoraire.heure_debut);
-            const h = heureDebut.getHours();
+
+            const h = typeof phd.plageHoraire.heure_debut === "number"
+              ? phd.plageHoraire.heure_debut
+              : new Date(phd.plageHoraire.heure_debut).getHours();
+
             if (jour && !isNaN(h)) {
               initial.push(`${jour}-${h}h`);
             }
@@ -60,55 +63,49 @@ export default function ProfessorDetail() {
   }, [id]);
 
   useEffect(() => { loadData(); }, [id, loadData]);
-
   const handleSavePlanning = async () => {
     try {
-      // On récupère l'auteur depuis le localStorage pour la traçabilité
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const auteurNom = storedUser.prenom ? `${storedUser.prenom} ${storedUser.nom}` : "Admin";
+      const auteurNom =
+        storedUser.prenom ? `${storedUser.prenom} ${storedUser.nom}` : "Admin";
 
       const payload = {
-        modifierPar: auteurNom, // Indispensable pour éviter l'erreur 500
-        disponibilites: selectedSlots.map(s => {
-          const [jour, hStr] = s.split('-');
-          const h = parseInt(hStr);
-          return { jour, heure_debut: `${h}`, heure_fin: `${h + 1}` };
-        })
+        modifierPar: auteurNom,
+        disponibilites: selectedSlots
+          .map(s => {
+            if (!s || typeof s !== "string") return null;
+
+            const parts = s.split("-");
+            if (parts.length !== 2) return null;
+
+            const jour = parts[0]?.toLowerCase()?.trim();
+            const heure = Number(parts[1]?.replace("h", ""));
+
+            if (!jour || isNaN(heure)) return null;
+
+            return {
+              jour,
+              heure_debut: heure,
+              heure_fin: heure + 1
+            };
+          })
+          .filter(Boolean)
       };
 
-      const response = await updateProfesseur(id, payload);
-      // Le backend retourne { message: "...", data: professeur }
-      const updatedProfesseur = response?.data?.data || response?.data || response;
-      
-      // Mettre à jour le professeur avec les données retournées par l'API
-      if (updatedProfesseur) {
-        setProfesseur(updatedProfesseur);
-        
-        // Recalculer les slots sélectionnés depuis les données fraîches
-        const initial = [];
-        updatedProfesseur?.disponibilites?.forEach(d => {
-          const jour = d.jour?.toLowerCase(); // Normaliser en minuscules
-          d.plageHoraire_Disponibilites?.forEach(phd => {
-            if (phd.plageHoraire) {
-              const heureDebut = new Date(phd.plageHoraire.heure_debut);
-              const h = heureDebut.getHours();
-              if (jour && !isNaN(h)) {
-                initial.push(`${jour}-${h}h`);
-              }
-            }
-          });
-        });
-        setSelectedSlots(initial);
-      }
-      
+      await updateProfesseur(id, payload);
+
       successToast("Planning sauvegardé avec succès");
+
       setIsEditing(false);
+
+      // 🔥 IMPORTANT : force refresh DB
+      await loadData();
+
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Erreur de sauvegarde";
       errorToast(errorMsg);
     }
   };
-
   const handleUnassignSubmit = async (seanceId) => {
     if (!seanceId || !Number.isInteger(seanceId)) {
       errorToast("Séance invalide");
@@ -190,27 +187,34 @@ export default function ProfessorDetail() {
 
   const handleExportAvailability = async () => {
     if (!professeur) return;
+
     try {
       setIsExportingPDF(true);
 
-      const professorName = `${professeur.prenom || ""} ${professeur.nom || ""}`.trim();
+      const professorName =
+        `${professeur.prenom || ""} ${professeur.nom || ""}`.trim();
+
       const specialities =
         professeur.specialite_professeurs
           ?.map((item) => item.specialite?.nom)
           .filter(Boolean)
           .join(", ") || "Non assignée";
 
-      // Transformer les disponibilités en format simplifié
+      // =========================
+      // 🔥 NORMALISATION SIMPLE (INT ONLY)
+      // =========================
       const availabilities = [];
+
       professeur.disponibilites?.forEach((dispo) => {
         dispo.plageHoraire_Disponibilites?.forEach((phd) => {
-          if (phd.plageHoraire) {
-            availabilities.push({
-              jour: dispo.jour,
-              heureDebut: phd.plageHoraire.heure_debut,
-              heureFin: phd.plageHoraire.heure_fin,
-            });
-          }
+          const plage = phd.plageHoraire;
+          if (!plage) return;
+
+          availabilities.push({
+            jour: dispo.jour,
+            heureDebut: Number(plage.heure_debut),
+            heureFin: Number(plage.heure_fin),
+          });
         });
       });
 
@@ -224,8 +228,10 @@ export default function ProfessorDetail() {
         availabilities,
         filename
       );
+
+      successToast("PDF généré avec succès");
     } catch (err) {
-      console.error("Erreur export PDF:", err);
+      console.error(err);
       errorToast("Erreur lors de l'exportation du PDF");
     } finally {
       setIsExportingPDF(false);
@@ -253,7 +259,7 @@ export default function ProfessorDetail() {
               {isEditing ? (
                 <button className="btn-primary" onClick={handleSavePlanning}><FiSave /> Sauvegarder</button>
               ) : (
-                <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier Planning</button>
+                <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier disponibilités</button>
               )}
               <button
                 className="btn btn-success"

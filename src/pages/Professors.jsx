@@ -18,7 +18,7 @@ const emptyForm = {
   id: null,
   prenom: "",
   nom: "",
-  specialiteId: null,
+  specialiteIds: [],
 };
 
 function ProfessorRow({
@@ -42,6 +42,11 @@ function ProfessorRow({
       </td>
 
       <td>{professeur.matricule}</td>
+      <td>
+        {professeur.specialite_professeurs && professeur.specialite_professeurs.length > 0
+          ? professeur.specialite_professeurs.map((sp) => sp.specialite?.nom).join(", ")
+          : "N/A"}
+      </td>
 
       <td className="menu-cell" style={{ position: "relative" }}>
         <button
@@ -108,6 +113,7 @@ export default function Professors() {
   const [professeurs, setProfesseurs] = useState([]);
   const [specialites, setSpecialites] = useState([]);
   const [query, setQuery] = useState("");
+  const [selectedSpecialiteId, setSelectedSpecialiteId] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -158,10 +164,14 @@ export default function Professors() {
     return professeurs.filter((p) => {
       const fullName = `${p.prenom ?? ""} ${p.nom ?? ""}`.toLowerCase();
       const matricule = (p.matricule ?? "").toLowerCase();
+      const professeurSpecialiteIds = p.specialite_professeurs?.map((sp) => sp.specialiteId) || [];
 
-      return !q || fullName.includes(q) || matricule.includes(q);
+      const matchesText = !q || fullName.includes(q) || matricule.includes(q);
+      const matchesSpecialite = !selectedSpecialiteId || professeurSpecialiteIds.includes(selectedSpecialiteId);
+
+      return matchesText && matchesSpecialite;
     });
-  }, [professeurs, query]);
+  }, [professeurs, query, selectedSpecialiteId]);
 
   const closeModal = () => setOpen(false);
 
@@ -179,12 +189,12 @@ export default function Professors() {
   const openEditModal = (professeur) => {
     setMode("edit");
     setFormError("");
-    const specialiteId = professeur.specialite_professeurs?.[0]?.specialiteId || null;
+    const specialiteIds = professeur.specialite_professeurs?.map((sp) => sp.specialiteId) || [];
     setForm({
       id: professeur.id,
       prenom: professeur.prenom ?? "",
       nom: professeur.nom ?? "",
-      specialiteId: specialiteId,
+      specialiteIds: specialiteIds,
     });
     setOpen(true);
   };
@@ -218,15 +228,15 @@ export default function Professors() {
 
     const nomTrim = form.nom.trim();
 
-    if (!nomTrim || !form.specialiteId) {
-      setFormError("Le nom et la spécialité sont obligatoires.");
+    if (!nomTrim || !form.specialiteIds || form.specialiteIds.length === 0) {
+      setFormError("Le nom et au moins une spécialité sont obligatoires.");
       return;
     }
 
     const payload = {
       prenom: form.prenom.trim(),
       nom: nomTrim,
-      specialiteIds: [Number(form.specialiteId)],
+      specialiteIds: form.specialiteIds.map(Number),
     };
 
     try {
@@ -281,6 +291,26 @@ export default function Professors() {
             />
           </div>
 
+          <select
+            value={selectedSpecialiteId || ""}
+            onChange={(e) => setSelectedSpecialiteId(e.target.value ? Number(e.target.value) : null)}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              backgroundColor: "#fff",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            <option value="">Toutes les spécialités</option>
+            {specialites.map((spec) => (
+              <option key={spec.id} value={spec.id}>
+                {spec.nom}
+              </option>
+            ))}
+          </select>
+
           <button className="add-user-btn" onClick={openCreateModal}>
             + Ajouter un professeur
           </button>
@@ -292,6 +322,8 @@ export default function Professors() {
               <tr>
                 <th>Nom complet</th>
                 <th>Matricule</th>
+                <th>Spécialité</th>
+
                 <th></th>
               </tr>
             </thead>
@@ -366,19 +398,33 @@ export default function Professors() {
 
                 <div className="modal-field">
                   <label>
-                    <span className="required-star">*</span> Spécialité
+                    <span className="required-star">*</span> Spécialités
                   </label>
-                  <select
-                    value={form.specialiteId || ""}
-                    onChange={(e) => onChange("specialiteId", e.target.value ? Number(e.target.value) : null)}
-                  >
-                    <option value="">Sélectionner une spécialité...</option>
-                    {specialites.map((spec) => (
-                      <option key={spec.id} value={spec.id}>
-                        {spec.nom}
-                      </option>
-                    ))}
-                  </select>
+                  <div style={{ border: "1px solid #d1d5db", borderRadius: "6px", padding: "12px", maxHeight: "200px", overflowY: "auto" }}>
+                    {specialites.length > 0 ? (
+                      specialites.map((spec) => (
+                        <div key={spec.id} style={{ marginBottom: "8px", display: "flex", alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            id={`spec-${spec.id}`}
+                            checked={form.specialiteIds.includes(spec.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                onChange("specialiteIds", [...form.specialiteIds, spec.id]);
+                              } else {
+                                onChange("specialiteIds", form.specialiteIds.filter((id) => id !== spec.id));
+                              }
+                            }}
+                          />
+                          <label htmlFor={`spec-${spec.id}`} style={{ marginLeft: "8px", cursor: "pointer", margin: 0 }}>
+                            {spec.nom}
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <p style={{ margin: 0, color: "#999" }}>Aucune spécialité disponible</p>
+                    )}
+                  </div>
                 </div>
 
                 {formError && <div className="modal-error">{formError}</div>}

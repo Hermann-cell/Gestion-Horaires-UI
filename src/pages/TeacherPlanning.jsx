@@ -191,23 +191,20 @@ export default function TeacherPlanning() {
   };
 
   const formatTime = (value) => {
-    if (!value) return "-";
-    return new Date(value).toLocaleTimeString("fr-CA", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (value === null || value === undefined) return "-";
+
+    return `${value.toString().padStart(2, "0")}:00`;
   };
 
   const getSeancesForSlot = (jour, heure) => {
     return filteredRows.filter((row) => {
       if (!row.date || !row.heureDebut) return false;
-      
+
       const rowDate = new Date(row.date);
       const rowDay = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"][rowDate.getDay()];
-      
-      const heureDebut = new Date(row.heureDebut);
-      const rowHeure = heureDebut.getHours();
-      
+
+      const rowHeure = Number(row.heureDebut);
+
       return rowDay === jour && rowHeure === heure;
     });
   };
@@ -460,26 +457,28 @@ export default function TeacherPlanning() {
               </div>
 
               <div className="mt-3 d-flex gap-2 flex-wrap">
-                <button 
+                <button
                   className="btn btn-outline-secondary"
                   onClick={resetFilters}
                 >
                   Réinitialiser
                 </button>
-                <button 
+
+                {/* <button 
                   className="btn btn-outline-primary"
                   onClick={loadPlanning}
                 >
                   <FiRefreshCw size={16} className="me-1" /> Rafraîchir
-                </button>
-                <button 
+                </button> */}
+
+                <button
                   className="btn btn-success"
                   onClick={handleExportPDF}
                   disabled={exportingPDF || !filters.enseignantSelect}
                   title={!filters.enseignantSelect ? "Sélectionnez d'abord un enseignant" : "Exporter le planning en PDF"}
                   style={{ marginLeft: "auto" }}
                 >
-                  <FiDownload size={16} className="me-1" /> 
+                  <FiDownload size={16} className="me-1" />
                   {exportingPDF ? "Génération..." : "Export PDF"}
                 </button>
                 <div className="d-flex gap-2">
@@ -512,7 +511,7 @@ export default function TeacherPlanning() {
                   </h6>
                   <p className="text-muted mb-0">
                     <strong>{filteredRows.length}</strong> séance(s) trouvée(s)
-                    {planningRows.length > filteredRows.length && 
+                    {planningRows.length > filteredRows.length &&
                       ` / ${planningRows.length} au total`
                     }
                   </p>

@@ -4,13 +4,23 @@ import "@/styles/rooms.css";
 import { FiSearch } from "react-icons/fi";
 import DataTable from "@/components/DataTable.jsx";
 import * as coursApi from "@/api/coursApi";
+import * as typeSalleApi from "@/api/typeSalleApi";
 import * as specialiteApi from "@/api/specialiteApi";
 import * as programmeApi from "@/api/programmeApi";
 import { ToastContainer, toast } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 
-const emptyForm = { id: null, code: "", nom: "", duree: "", etape: "", specialiteId: "", programmeId: "" };
+const emptyForm = { 
+  id: null,
+  code: "",
+  nom: "",
+  duree: "",
+  etape: "",
+  specialiteId: "",
+  programmeId: "",
+  typeDeSalleId: "",
+};
 
 const successToast = (msg) =>
   toast.success(msg, { position: "top-right", autoClose: 3000 });
@@ -23,6 +33,7 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [specialites, setSpecialites] = useState([]);
   const [programmes, setProgrammes] = useState([]);
+  const [typeSalles, setTypeSalles] = useState([]);
   const [query, setQuery] = useState("");
   const [filterSpecialite, setFilterSpecialite] = useState("");
   const [filterProgramme, setFilterProgramme] = useState("");
@@ -85,9 +96,20 @@ export default function Courses() {
     }
   };
 
+  const loadTypeSalles = async () => {
+    try {
+      const res = await typeSalleApi.getTypeSalles();
+      const data = Array.isArray(res) ? res : res.data;
+      setTypeSalles(data || []);
+    } catch (err) {
+      console.error("Erreur chargement types de salles", err);
+      setTypeSalles([]);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
-      await Promise.all([loadCourses(), loadSpecialites(), loadProgrammes()]);
+      await Promise.all([loadCourses(), loadSpecialites(), loadProgrammes(), loadTypeSalles()]);
     };
 
     void init();
@@ -170,9 +192,8 @@ export default function Courses() {
       duree: course.duree,
       etape: course.etape,
       specialiteId: course.specialite?.id || "",
-      programmeId:
-        (course.cours_programmes && course.cours_programmes[0]?.programme?.id) ||
-        "",
+      programmeId: (course.cours_programmes && course.cours_programmes[0]?.programme?.id) ||"",
+      typeDeSalleId: course.typeDeSalle?.id || "",
     });
     setOpen(true);
   };
@@ -238,13 +259,14 @@ export default function Courses() {
     }
 
     const payload = {
-      code: codeTrim,
-      nom: nomTrim,
-      duree: dureeVal,
-      etape: etapeVal,
-      specialiteId: form.specialiteId ? parseInt(form.specialiteId) : null,
-      typeDeSalleId: null,
-    };
+  code: codeTrim,
+  nom: nomTrim,
+  duree: dureeVal,
+  etape: etapeVal,
+  specialiteId: form.specialiteId ? parseInt(form.specialiteId) : null,
+  typeDeSalleId: form.typeDeSalleId ? parseInt(form.typeDeSalleId) : null,
+  programmeId: form.programmeId ? parseInt(form.programmeId) : null,
+};
 
     try {
       if (mode === "create") {
@@ -413,6 +435,20 @@ export default function Courses() {
                   />
                 </div>
 
+                <div className="modal-field">
+                  <label>
+                    <span className="required-star">*</span> Type de salle
+                  </label>
+                  <select value={form.typeDeSalleId} onChange={(e) => onChange("typeDeSalleId", e.target.value)}>
+                    <option value="">Aucun type de salle</option>
+                    {typeSalles.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="modal-grid">
                   <div className="modal-field">
                     <label>
@@ -488,7 +524,8 @@ export default function Courses() {
               </form>
             </div>
           </div>
-        )}
+        )
+        }
 
         <Modal show={showDeleteModal} onHide={closeDeleteModal} centered>
           <Modal.Header closeButton>
@@ -513,7 +550,7 @@ export default function Courses() {
             </Button>
           </Modal.Footer>
         </Modal>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

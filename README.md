@@ -142,13 +142,25 @@ Cette structure permet :
 
 ## 👨‍💻 Auteur
 
-Développé par **Hermann Blondel Njeutsa**
+Développé par :
+- ### Hermann Blondel Njeutsa
+  GitHub : https://github.com/Hermann-cell
+  LinkedIn : https://www.linkedin.com/in/hermann-njeutsa-6739601b9/
+
+- ### Liliane Claire Kana Ngningha
+  GitHub : 
+  LinkedIn : 
+
+- ### Albert Boyomo Ngnama
+  GitHub :
+  LinkedIn : 
 
 ---
 
 ## 📄 Licence
 
-Projet à usage éducatif et démonstratif.
+Ce projet est sous licence propriétaire.
+Voir le fichier LICENSE pour plus d’informations.
 
 ---
 
