@@ -253,7 +253,7 @@ export default function ProfessorDetail() {
               {isEditing ? (
                 <button className="btn-primary" onClick={handleSavePlanning}><FiSave /> Sauvegarder</button>
               ) : (
-                <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier Planning</button>
+                <button className="btn-outline-primary" onClick={() => setIsEditing(true)}>Modifier disponibilités</button>
               )}
               <button
                 className="btn btn-success"

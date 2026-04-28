@@ -42,6 +42,7 @@ function ProfessorRow({
       </td>
 
       <td>{professeur.matricule}</td>
+      <td>{professeur.specialite_professeurs?.[0]?.specialite?.nom || "N/A"}</td>
 
       <td className="menu-cell" style={{ position: "relative" }}>
         <button
@@ -292,6 +293,8 @@ export default function Professors() {
               <tr>
                 <th>Nom complet</th>
                 <th>Matricule</th>
+                <th>Spécialité</th>
+
                 <th></th>
               </tr>
             </thead>

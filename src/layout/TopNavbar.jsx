@@ -16,27 +16,40 @@ export default function TopNavbar() {
   const getTitle = () => {
     const path = location.pathname;
 
-    switch (path) {
-      case "/":
+    switch (true) {
+      case path === "/":
         return "Tableau de bord";
-      case "/users":
+
+      case path === "/users":
         return "Gestion des utilisateurs";
-      case "/rooms":
+
+      case path === "/rooms":
         return "Gestion des Salles";
-      case "/professors":
+
+      case path === "/professors":
         return "Gestion des Professeurs";
-      case "/seances":
+
+      case path.startsWith("/professors/"):
+        return "Détail du Professeur";
+
+      case path === "/seances":
         return "Gestion des Séances";
-      case "/planning":
+
+      case path === "/planning":
         return "Planning academique";
-      case "/planning-enseignants":
+
+      case path === "/planning-enseignants":
         return "Planning des Enseignants";
-      case "/courses":
+
+      case path === "/courses":
         return "Gestion des cours";
-      case "/profile":
+
+      case path === "/profile":
         return "Profil utilisateur";
-      case "/change-password":
+
+      case path === "/change-password":
         return "Changer le mot de passe";
+
       default:
         return "Dashboard";
     }

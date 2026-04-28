@@ -197,7 +197,7 @@ export default function Rooms() {
           ? "Erreur lors de la création."
           : "Erreur lors de la modification."
       );
-      errorToast("Erreur lors de l'opération.");
+      errorToast(err.response?.data?.message || "Une erreur est survenue.");
     }
   };
 

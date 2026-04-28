@@ -183,9 +183,8 @@ export default function Courses() {
       duree: course.duree,
       etape: course.etape,
       specialiteId: course.specialite?.id || "",
-      programmeId:
-        (course.cours_programmes && course.cours_programmes[0]?.programme?.id) ||
-        "",
+      programmeId: (course.cours_programmes && course.cours_programmes[0]?.programme?.id) ||"",
+      typeDeSalleId: course.typeDeSalle?.id || "",
     });
     setOpen(true);
   };
@@ -256,7 +255,7 @@ export default function Courses() {
       duree: dureeVal,
       etape: etapeVal,
       specialiteId: form.specialiteId ? parseInt(form.specialiteId) : null,
-      typeDeSalleId: null,
+      typeDeSalleId: form.typeDeSalleId ? parseInt(form.typeDeSalleId) : null,
     };
 
     try {
