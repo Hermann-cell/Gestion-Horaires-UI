@@ -11,7 +11,16 @@ import { ToastContainer, toast } from "react-toastify";
 import { Modal, Button } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 
-const emptyForm = { id: null, code: "", nom: "", duree: "", etape: "", specialiteId: "", programmeId: "" };
+const emptyForm = { 
+  id: null,
+  code: "",
+  nom: "",
+  duree: "",
+  etape: "",
+  specialiteId: "",
+  programmeId: "",
+  typeDeSalleId: "",
+};
 
 const successToast = (msg) =>
   toast.success(msg, { position: "top-right", autoClose: 3000 });
@@ -250,13 +259,14 @@ export default function Courses() {
     }
 
     const payload = {
-      code: codeTrim,
-      nom: nomTrim,
-      duree: dureeVal,
-      etape: etapeVal,
-      specialiteId: form.specialiteId ? parseInt(form.specialiteId) : null,
-      typeDeSalleId: form.typeDeSalleId ? parseInt(form.typeDeSalleId) : null,
-    };
+  code: codeTrim,
+  nom: nomTrim,
+  duree: dureeVal,
+  etape: etapeVal,
+  specialiteId: form.specialiteId ? parseInt(form.specialiteId) : null,
+  typeDeSalleId: form.typeDeSalleId ? parseInt(form.typeDeSalleId) : null,
+  programmeId: form.programmeId ? parseInt(form.programmeId) : null,
+};
 
     try {
       if (mode === "create") {
