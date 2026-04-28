@@ -227,6 +227,52 @@ export default function Seances() {
     loadData();
   }, [loadData]);
 
+  // Filter compatible professors for current form state
+  const getCompatibleProfesseurs = () => {
+    if (!form.date || !form.plageHoraireId || !form.coursId) {
+      return []; // Only show compatible when all required fields are filled
+    }
+
+    const jours = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+    const jour = jours[new Date(form.date).getDay()];
+    const seanceDate = new Date(form.date).toDateString();
+    const coursSelected = cours.find((c) => c.id === form.coursId);
+
+    return professeurs.filter((prof) => {
+      // Check specialite compatibility
+      if (coursSelected?.specialiteId) {
+        const hasSpecialite = prof.specialite_professeurs?.some(
+          (sp) => sp.specialiteId === coursSelected.specialiteId && sp.supprimeLe === null
+        );
+        if (!hasSpecialite) return false;
+      }
+
+      // Check availability at this date/time slot
+      const isAvailable = prof.disponibilites?.some((disp) => {
+        if (disp.supprimeLe !== null) return false;
+        const memeJour = disp.jour?.trim().toLowerCase() === jour;
+        if (!memeJour) return false;
+        return disp.plageHoraire_Disponibilites?.some((phd) => {
+          return phd.supprimeLe === null && phd.plageHoraireId === form.plageHoraireId;
+        });
+      });
+      if (!isAvailable) return false;
+
+      // Check no conflict with other seances at this date/time
+      const hasConflict = seances.some(
+        (s) =>
+          s.id !== form.id &&
+          new Date(s.date).toDateString() === seanceDate &&
+          s.professeurId === prof.id &&
+          s.plageHoraireId === form.plageHoraireId &&
+          s.supprimeLe === null
+      );
+      if (hasConflict) return false;
+
+      return true;
+    });
+  };
+
   // Check for conflicts
   const checkConflicts = (formData) => {
     const errors = [];
@@ -256,6 +302,25 @@ export default function Seances() {
 
     // Check professeur conflict (if assigned)
     if (formData.professeurId) {
+      const prof = professeurs.find((p) => p.id === formData.professeurId);
+      
+      // Check availability
+      const jours = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+      const jour = jours[new Date(formData.date).getDay()];
+      const isAvailable = prof?.disponibilites?.some((disp) => {
+        if (disp.supprimeLe !== null) return false;
+        const memeJour = disp.jour?.trim().toLowerCase() === jour;
+        if (!memeJour) return false;
+        return disp.plageHoraire_Disponibilites?.some((phd) => {
+          return phd.supprimeLe === null && phd.plageHoraireId === formData.plageHoraireId;
+        });
+      });
+
+      if (!isAvailable) {
+        errors.push(`Le professeur n'est pas disponible à cette date/horaire`);
+      }
+
+      // Check conflict with other seances
       const profConflict = seances.find(
         (s) =>
           s.id !== formData.id &&
@@ -266,8 +331,22 @@ export default function Seances() {
       );
 
       if (profConflict) {
-        const prof = professeurs.find((p) => p.id === formData.professeurId);
-        errors.push(`Prof occupé: ${prof?.prenom} ${prof?.nom}`);
+        errors.push(`Le professeur est déjà affecté à cette date/horaire`);
+      }
+
+      // Check specialite
+      const cours_selected = cours.find((c) => c.id === formData.coursId);
+      if (cours_selected?.specialiteId) {
+        const hasSpecialite = prof?.specialite_professeurs?.some(
+          (sp) => sp.specialiteId === cours_selected.specialiteId
+        );
+        if (!hasSpecialite) {
+          const coursSpecialite = cours_selected.specialite?.nom || "inconnue";
+          const professeurSpecialites = prof?.specialite_professeurs
+            ?.map((sp) => sp.specialite?.nom)
+            .join(", ") || "Aucune";
+          errors.push(`Spécialité incompatible. Cours: ${coursSpecialite}, Professeur: ${professeurSpecialites}`);
+        }
       }
     }
 
@@ -299,13 +378,13 @@ export default function Seances() {
 
     // Validation
     if (!form.date || !form.coursId || !form.salleId || !form.plageHoraireId) {
-      setFormError("Tous les champs requis doivent être remplis");
+      setFormError("❌ Tous les champs requis doivent être remplis");
       return;
     }
 
     const conflicts = checkConflicts(form);
     if (conflicts.length > 0) {
-      setFormError("Conflits d'horaire: " + conflicts.join(", "));
+      setFormError("⚠️ Conflits d'horaire détectés:\n" + conflicts.map(c => "• " + c).join("\n"));
       return;
     }
 
@@ -338,11 +417,26 @@ export default function Seances() {
       await loadData();
     } catch (error) {
       console.error("Erreur:", error);
-      // Extraire le message d'erreur depuis différentes sources possibles
-      const errorMessage =
+      // Extract error message with fallback to different error sources
+      let errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Erreur lors de la sauvegarde";
+      
+      // Format the error message for better readability
+      if (errorMessage.includes("professeur n'a pas la spécialité")) {
+        const match = errorMessage.match(/Cours: (.*?), Spécialités du professeur: (.*)/);
+        if (match) {
+          errorMessage = `❌ Spécialité incompatible\n• Cours demande: ${match[1]}\n• Professeur possède: ${match[2]}`;
+        }
+      } else if (errorMessage.includes("disponible")) {
+        errorMessage = "❌ Le professeur n'est pas disponible pour cette date/horaire";
+      } else if (errorMessage.includes("occupée")) {
+        errorMessage = "❌ La salle est déjà occupée à cette date/horaire";
+      } else if (errorMessage.includes("affecté à une autre séance")) {
+        errorMessage = "❌ Le professeur est déjà affecté à une autre séance à cette date/horaire";
+      }
+      
       setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -617,7 +711,21 @@ export default function Seances() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="seances-form">
-                {formError && <div className="form-error">{formError}</div>}
+                {formError && (
+                  <div 
+                    className="form-error" 
+                    style={{ 
+                      whiteSpace: "pre-wrap", 
+                      wordWrap: "break-word",
+                      padding: "12px",
+                      backgroundColor: "#fee",
+                      borderLeft: "4px solid #dc3545",
+                      borderRadius: "4px"
+                    }}
+                  >
+                    {formError}
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label>Date *</label>
@@ -625,8 +733,16 @@ export default function Seances() {
                     type="date"
                     required
                     value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    onChange={(e) => {
+                      setForm({ ...form, date: e.target.value, professeurId: null });
+                      setFormError(""); // Clear errors when date changes
+                    }}
                   />
+                  {form.date && (
+                    <small style={{ color: "#666", display: "block", marginTop: "4px" }}>
+                      📅 {new Date(form.date).toLocaleDateString("fr-CA", { weekday: "long", day: "numeric", month: "long" })}
+                    </small>
+                  )}
                 </div>
 
                 <div className="form-row">
@@ -635,12 +751,12 @@ export default function Seances() {
                     <select
                       required
                       value={form.coursId || ""}
-                      onChange={(e) => setForm({ ...form, coursId: Number(e.target.value) })}
+                      onChange={(e) => setForm({ ...form, coursId: Number(e.target.value), professeurId: null })}
                     >
                       <option value="">Sélectionner...</option>
                       {cours.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.nom}
+                          {c.nom} {c.specialite ? `(${c.specialite.nom})` : "(Sans spécialité)"}
                         </option>
                       ))}
                     </select>
@@ -669,7 +785,9 @@ export default function Seances() {
                     <select
                       required
                       value={form.plageHoraireId || ""}
-                      onChange={(e) => setForm({ ...form, plageHoraireId: Number(e.target.value) })}
+                      onChange={(e) => {
+                        setForm({ ...form, plageHoraireId: Number(e.target.value), professeurId: null });
+                      }}
                     >
                       <option value="">Sélectionner...</option>
                       {plageHoraires.map((p) => (
@@ -682,19 +800,43 @@ export default function Seances() {
 
                   <div className="form-group">
                     <label>Professeur (optionnel)</label>
-                    <select
-                      value={form.professeurId || ""}
-                      onChange={(e) =>
-                        setForm({ ...form, professeurId: e.target.value ? Number(e.target.value) : null })
-                      }
-                    >
-                      <option value="">Aucun</option>
-                      {professeurs.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.prenom} {p.nom}
-                        </option>
-                      ))}
-                    </select>
+                    {!form.date || !form.plageHoraireId || !form.coursId ? (
+                      <div style={{
+                        padding: "12px",
+                        backgroundColor: "#e3f2fd",
+                        borderRadius: "4px",
+                        fontSize: "0.9em",
+                        color: "#1565c0"
+                      }}>
+                        ℹ️ Complétez la date, le cours et la plage horaire pour voir les professeurs disponibles
+                      </div>
+                    ) : (
+                      <>
+                        <select
+                          value={form.professeurId || ""}
+                          onChange={(e) =>
+                            setForm({ ...form, professeurId: e.target.value ? Number(e.target.value) : null })
+                          }
+                        >
+                          <option value="">Aucun</option>
+                          {getCompatibleProfesseurs().map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.prenom} {p.nom} ({p.specialite_professeurs?.map(sp => sp.specialite?.nom).filter(Boolean).join(", ") || "N/A"})
+                            </option>
+                          ))}
+                        </select>
+                        {getCompatibleProfesseurs().length === 0 && (
+                          <small style={{ color: "#dc3545", display: "block", marginTop: "4px", fontWeight: "bold" }}>
+                            ❌ Aucun professeur compatible avec cette date/horaire
+                          </small>
+                        )}
+                      </>
+                    )}
+                    {form.professeurId && !getCompatibleProfesseurs().find(p => p.id === form.professeurId) && (
+                      <small style={{ color: "#dc3545", display: "block", marginTop: "4px" }}>
+                        ⚠️ Ce professeur n'est pas disponible pour cette date/horaire
+                      </small>
+                    )}
                   </div>
                 </div>
 
