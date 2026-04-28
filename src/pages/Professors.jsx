@@ -109,6 +109,7 @@ export default function Professors() {
   const [professeurs, setProfesseurs] = useState([]);
   const [specialites, setSpecialites] = useState([]);
   const [query, setQuery] = useState("");
+  const [selectedSpecialiteId, setSelectedSpecialiteId] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -159,10 +160,14 @@ export default function Professors() {
     return professeurs.filter((p) => {
       const fullName = `${p.prenom ?? ""} ${p.nom ?? ""}`.toLowerCase();
       const matricule = (p.matricule ?? "").toLowerCase();
+      const professeurSpecialiteId = p.specialite_professeurs?.[0]?.specialiteId || null;
 
-      return !q || fullName.includes(q) || matricule.includes(q);
+      const matchesText = !q || fullName.includes(q) || matricule.includes(q);
+      const matchesSpecialite = !selectedSpecialiteId || professeurSpecialiteId === selectedSpecialiteId;
+
+      return matchesText && matchesSpecialite;
     });
-  }, [professeurs, query]);
+  }, [professeurs, query, selectedSpecialiteId]);
 
   const closeModal = () => setOpen(false);
 
@@ -281,6 +286,26 @@ export default function Professors() {
               placeholder="Recherche (nom ou matricule)..."
             />
           </div>
+
+          <select
+            value={selectedSpecialiteId || ""}
+            onChange={(e) => setSelectedSpecialiteId(e.target.value ? Number(e.target.value) : null)}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              backgroundColor: "#fff",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            <option value="">Toutes les spécialités</option>
+            {specialites.map((spec) => (
+              <option key={spec.id} value={spec.id}>
+                {spec.nom}
+              </option>
+            ))}
+          </select>
 
           <button className="add-user-btn" onClick={openCreateModal}>
             + Ajouter un professeur
