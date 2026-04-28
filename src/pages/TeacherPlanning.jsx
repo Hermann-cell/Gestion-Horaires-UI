@@ -466,12 +466,14 @@ export default function TeacherPlanning() {
                 >
                   Réinitialiser
                 </button>
-                <button 
+
+                {/* <button 
                   className="btn btn-outline-primary"
                   onClick={loadPlanning}
                 >
                   <FiRefreshCw size={16} className="me-1" /> Rafraîchir
-                </button>
+                </button> */}
+
                 <button 
                   className="btn btn-success"
                   onClick={handleExportPDF}

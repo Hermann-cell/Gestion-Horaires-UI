@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSeances } from "@/api/seanceApi";
 import { generateAcademicPlanningPDF } from "@/utils/generateAcademicPlanningPDF.js";
-import {  errorToast } from "@/utils/toastServices.js";
+import { errorToast } from "@/utils/toastServices.js";
 import { FiDownload } from "react-icons/fi";
 import "@/styles/planning.css";
 
@@ -393,9 +393,8 @@ function MonthView({ currentDate, items, roomColorMap, onOpenDay }) {
           return (
             <div
               key={iso}
-              className={`planning-month-cell ${isCurrentMonth ? "" : "muted"} ${
-                today ? "today" : ""
-              }`}
+              className={`planning-month-cell ${isCurrentMonth ? "" : "muted"} ${today ? "today" : ""
+                }`}
             >
               <button
                 type="button"
@@ -696,8 +695,8 @@ export default function Planning() {
         const rows = Array.isArray(response?.data)
           ? response.data
           : Array.isArray(response)
-          ? response
-          : [];
+            ? response
+            : [];
 
         const mapped = rows
           .map(mapSeance)
@@ -862,7 +861,9 @@ export default function Planning() {
             onClick={() => setCurrentDate(new Date())}
           >
             Aujourd’hui
-          </button>          <button
+          </button>
+
+          {/* <button
             type="button"
             className="planning-export-btn"
             onClick={handleExportPlanningPDF}
@@ -882,7 +883,9 @@ export default function Planning() {
           >
             <FiDownload size={16} />
             {isExportingPDF ? "Export..." : "Export PDF"}
-          </button>        </div>
+          </button> */}
+
+        </div>
       </div>
 
       <div className="planning-filters-card">
