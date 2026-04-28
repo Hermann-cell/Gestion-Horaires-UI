@@ -496,6 +496,29 @@
   cursor: not-allowed;
 }
 
+
+
+.seances-modal {
+  position: fixed;
+  z-index: 1050;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 1040;
+}
+
+.modal-header {
+  position: relative;
+}
+
+.btn-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1060;
+}
+
 /* RESPONSIVE */
 @media (max-width: 1024px) {
   .form-row {
