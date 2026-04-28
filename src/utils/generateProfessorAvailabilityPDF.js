@@ -20,61 +20,54 @@ export async function generateProfessorAvailabilityPDF(
   document.body.appendChild(container);
 
   // =========================
-  // 🔹 FORMAT HEURE FIXÉ (ANTI 19h BUG)
+  // 🔥 HEURE ULTRA SAFE (INT ONLY)
   // =========================
   const formatTime = (value) => {
-    if (!value) return "--:--";
+    const n = Number(value);
 
-    // CAS 1 : "HH:mm" ou "HH:mm:ss" (IMPORTANT ✔)
-    if (typeof value === "string" && /^\d{1,2}:\d{2}/.test(value)) {
-      const [h, m] = value.split(":").map(Number);
-
-      const d = new Date();
-      d.setHours(h, m, 0, 0);
-
-      return new Intl.DateTimeFormat("fr-CA", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).format(d);
+    if (Number.isFinite(n)) {
+      return `${String(n).padStart(2, "0")}:00`;
     }
 
-    // CAS 2 : ISO backend (DateTime)
-    const date = new Date(value);
+    // fallback si string "HH:mm"
+    if (typeof value === "string") {
+      const match = value.match(/^(\d{1,2}):(\d{2})/);
+      if (match) {
+        return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
+      }
+    }
 
-    if (isNaN(date.getTime())) return value;
-
-    return new Intl.DateTimeFormat("fr-CA", {
-      timeZone: "America/Toronto",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
+    return "--:--";
   };
 
-  // =========================
-  // 🔹 FORMAT JOUR
-  // =========================
-  const formatDay = (day) => {
-    if (!day) return "";
-    return day.charAt(0).toUpperCase() + day.slice(1);
-  };
+  const formatDay = (day) =>
+    day ? day.charAt(0).toUpperCase() + day.slice(1) : "";
 
   // =========================
-  // 🔹 GROUP BY DAY
+  // GROUP BY DAY
   // =========================
   const grouped = {};
+
   availabilities.forEach((a) => {
     const day = a.jour?.toLowerCase() || "inconnu";
     if (!grouped[day]) grouped[day] = [];
     grouped[day].push(a);
   });
 
-  const order = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+  const order = [
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+  ];
+
   const sortedDays = order.filter((d) => grouped[d]);
 
   // =========================
-  // 🔹 HTML
+  // HTML
   // =========================
   container.innerHTML = `
     <div style="text-align:center;margin-bottom:25px;">
@@ -93,9 +86,9 @@ export async function generateProfessorAvailabilityPDF(
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr style="background:#1f3f8a;color:white;">
-          <th style="padding:10px;">Jour</th>
-          <th style="padding:10px;">Début</th>
-          <th style="padding:10px;">Fin</th>
+          <th style="padding:10px;text-align:left;border:1px solid #1f3f8a;">Jour</th>
+          <th style="padding:10px;text-align:center;border:1px solid #1f3f8a;">Début</th>
+          <th style="padding:10px;text-align:center;border:1px solid #1f3f8a;">Fin</th>
         </tr>
       </thead>
       <tbody>
@@ -104,20 +97,20 @@ export async function generateProfessorAvailabilityPDF(
             grouped[day]
               .map(
                 (a, idx) => `
-              <tr style="background:${i % 2 === 0 ? "#fff" : "#f9fafb"};">
-                <td style="padding:8px;border:1px solid #ddd;font-weight:${
-                  idx === 0 ? "bold" : "normal"
-                };">
-                  ${idx === 0 ? formatDay(day) : ""}
-                </td>
-                <td style="padding:8px;border:1px solid #ddd;">
-                  ${formatTime(a.heureDebut)}
-                </td>
-                <td style="padding:8px;border:1px solid #ddd;">
-                  ${formatTime(a.heureFin)}
-                </td>
-              </tr>
-            `
+                <tr style="background:${i % 2 === 0 ? "#fff" : "#f9fafb"};">
+                  <td style="padding:8px;border:1px solid #ddd;font-weight:${
+                    idx === 0 ? "bold" : "normal"
+                  };">
+                    ${idx === 0 ? formatDay(day) : ""}
+                  </td>
+                  <td style="padding:8px;border:1px solid #ddd;text-align:center;">
+                    ${formatTime(a.heureDebut)}
+                  </td>
+                  <td style="padding:8px;border:1px solid #ddd;text-align:center;">
+                    ${formatTime(a.heureFin)}
+                  </td>
+                </tr>
+              `
               )
               .join("")
           )
@@ -130,9 +123,6 @@ export async function generateProfessorAvailabilityPDF(
     </div>
   `;
 
-  // =========================
-  // 🔹 PDF GENERATION
-  // =========================
   try {
     const canvas = await html2canvas(container, {
       scale: 2,
@@ -145,12 +135,20 @@ export async function generateProfessorAvailabilityPDF(
     const imgWidth = 190;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.addImage(
+      canvas.toDataURL("image/png"),
+      "PNG",
+      10,
+      10,
+      imgWidth,
+      imgHeight
+    );
+
     pdf.save(filename);
 
     successToast("PDF généré avec succès");
   } catch (error) {
-    console.error("Erreur PDF:", error);
+    console.error(error);
     throw error;
   } finally {
     document.body.removeChild(container);
