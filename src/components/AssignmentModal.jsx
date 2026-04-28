@@ -14,7 +14,7 @@ export default function AssignmentModal({ isOpen, onClose, onAssign, isSubmittin
       const res = await getAvailableSeances();
       // On extrait les données selon la structure de la réponse API
       const data = res.data || res;
-      
+
       if (Array.isArray(data)) {
         setSeances(data);
       } else {
@@ -69,9 +69,16 @@ export default function AssignmentModal({ isOpen, onClose, onAssign, isSubmittin
           ) : seances.length > 0 ? (
             <div className="seance-list-container">
               {seances.map((s) => {
-                // Extraction sécurisée du jour via la table de jointure
-                const jourInfo = s.plageHoraire?.plageHoraire_Disponibilites?.[0]?.disponibilite?.jour;
-                
+
+                const displayJour = s.date
+                  ? new Intl.DateTimeFormat("fr-FR", {
+                    weekday: "long",
+                    timeZone: "America/Toronto"
+                  })
+                    .format(new Date(s.date))
+                    .replace(/^./, (c) => c.toUpperCase())
+                  : "Jour non défini";
+                  
                 return (
                   <div key={s.id} className="seance-item-card">
                     <div className="seance-info">
@@ -82,23 +89,23 @@ export default function AssignmentModal({ isOpen, onClose, onAssign, isSubmittin
                       <div className="seance-time">
                         <FiClock size={12} />
                         <span>
-                          {jourInfo || "Jour non défini"} • {
-                            typeof s.plageHoraire?.heure_debut === 'number' 
+                          {displayJour || "Jour non défini"} • {
+                            typeof s.plageHoraire?.heure_debut === 'number'
                               ? `${String(s.plageHoraire.heure_debut).padStart(2, '0')}:00`
-                              : (s.plageHoraire?.heure_debut 
-                                ? new Date(s.plageHoraire.heure_debut).getHours() + 'h' 
+                              : (s.plageHoraire?.heure_debut
+                                ? new Date(s.plageHoraire.heure_debut).getHours() + 'h'
                                 : '?')
                           } - {
-                            typeof s.plageHoraire?.heure_fin === 'number' 
+                            typeof s.plageHoraire?.heure_fin === 'number'
                               ? `${String(s.plageHoraire.heure_fin).padStart(2, '0')}:00`
-                              : (s.plageHoraire?.heure_fin 
-                                ? new Date(s.plageHoraire.heure_fin).getHours() + 'h' 
+                              : (s.plageHoraire?.heure_fin
+                                ? new Date(s.plageHoraire.heure_fin).getHours() + 'h'
                                 : '?')
                           }
                         </span>
                       </div>
                     </div>
-                    <button 
+                    <button
                       className={`btn-assign-action ${isSubmitting ? 'loading' : ''}`}
                       onClick={() => onAssign(s.id)}
                       disabled={isSubmitting}
