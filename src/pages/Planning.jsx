@@ -63,22 +63,35 @@ function formatDateLabel(dateValue) {
 }
 
 function formatHour(value) {
-  if (!value) return "--:--";
+  if (value === null || value === undefined) return "--:--";
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "--:--";
+  // Cas INT (ton modèle Prisma)
+  if (typeof value === "number") {
+    return `${String(value).padStart(2, "0")}:00`;
+  }
 
-  return date.toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  if (typeof value === "string" && value.includes(":")) {
+    return value.slice(0, 5);
+  }
+
+  return "--:--";
 }
 
 function getMinutesFromDateTime(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 0;
-  return date.getHours() * 60 + date.getMinutes();
+  if (value === null || value === undefined) return 0;
+
+  // Cas PlageHoraire Int (TON CAS)
+  if (typeof value === "number") {
+    return value * 60;
+  }
+
+  // fallback string "10:00"
+  if (typeof value === "string" && value.includes(":")) {
+    const [h, m] = value.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  return 0;
 }
 
 function startOfWeek(date) {
@@ -266,8 +279,8 @@ function mapSeance(raw) {
     plageFin: raw?.plageHoraire?.heure_fin || null,
     heureDebut: formatHour(raw?.plageHoraire?.heure_debut),
     heureFin: formatHour(raw?.plageHoraire?.heure_fin),
-    startMinutes: getMinutesFromDateTime(raw?.plageHoraire?.heure_debut),
-    endMinutes: getMinutesFromDateTime(raw?.plageHoraire?.heure_fin),
+    startMinutes: (raw?.plageHoraire?.heure_debut ?? 0) * 60,
+    endMinutes: (raw?.plageHoraire?.heure_fin ?? 0) * 60,
     roomKey: raw?.salle?.code || raw?.salle?.nom || "Salle",
   };
 }

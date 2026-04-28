@@ -10,8 +10,13 @@ import "@/styles/rooms.css";
 import "@/styles/calendar.css";
 
 
-const formatHeure = (dateString) => {
-  return new Date(dateString).toLocaleTimeString("fr-CA", {
+const formatHeure = (hour) => {
+  // If it's an integer (new format), format it as HH:00
+  if (typeof hour === "number") {
+    return `${String(hour).padStart(2, "0")}:00`;
+  }
+  // If it's a date string (old format), convert to hours
+  return new Date(hour).toLocaleTimeString("fr-CA", {
     hour: "2-digit",
     minute: "2-digit",
   });

@@ -83,13 +83,17 @@ export default function AssignmentModal({ isOpen, onClose, onAssign, isSubmittin
                         <FiClock size={12} />
                         <span>
                           {jourInfo || "Jour non défini"} • {
-                            s.plageHoraire?.heure_debut 
-                              ? new Date(s.plageHoraire.heure_debut).getHours() + 'h' 
-                              : '?'
+                            typeof s.plageHoraire?.heure_debut === 'number' 
+                              ? `${String(s.plageHoraire.heure_debut).padStart(2, '0')}:00`
+                              : (s.plageHoraire?.heure_debut 
+                                ? new Date(s.plageHoraire.heure_debut).getHours() + 'h' 
+                                : '?')
                           } - {
-                            s.plageHoraire?.heure_fin 
-                              ? new Date(s.plageHoraire.heure_fin).getHours() + 'h' 
-                              : '?'
+                            typeof s.plageHoraire?.heure_fin === 'number' 
+                              ? `${String(s.plageHoraire.heure_fin).padStart(2, '0')}:00`
+                              : (s.plageHoraire?.heure_fin 
+                                ? new Date(s.plageHoraire.heure_fin).getHours() + 'h' 
+                                : '?')
                           }
                         </span>
                       </div>
